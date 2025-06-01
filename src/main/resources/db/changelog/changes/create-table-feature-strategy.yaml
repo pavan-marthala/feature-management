@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: strategy-1
+      author: pavan
+      changes:
+        - createTable:
+            tableName: feature_strategy
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: strategy_type
+                  type: VARCHAR(255)
+              - column:
+                  name: feature_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMP
+#        - addForeignKeyConstraint:
+#            baseTableName: feature_strategy
+#            baseColumnNames: feature_id
+#            referencedTableName: feature
+#            referencedColumnNames: id
+#            constraintName: fk_feature_strategy_feature

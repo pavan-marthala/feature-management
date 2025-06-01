@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: fk-1
+      author: pavan
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: feature
+            baseColumnNames: environment_id
+            referencedTableName: environment
+            referencedColumnNames: id
+            constraintName: fk_feature_environment
+
+  - changeSet:
+      id: fk-2
+      author: pavan
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: environment_owner
+            baseColumnNames: environment_id
+            referencedTableName: environment
+            referencedColumnNames: id
+            constraintName: fk_env_owner_env
+
+  - changeSet:
+      id: fk-3
+      author: pavan
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: environment_owner
+            baseColumnNames: owner_id
+            referencedTableName: owner
+            referencedColumnNames: id
+            constraintName: fk_env_owner_owner
+
+  - changeSet:
+      id: fk-4
+      author: pavan
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: owner_feature
+            baseColumnNames: owner_id
+            referencedTableName: owner
+            referencedColumnNames: id
+            constraintName: fk_owner_feature_owner
+
+  - changeSet:
+      id: fk-5
+      author: pavan
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: owner_feature
+            baseColumnNames: feature_id
+            referencedTableName: feature
+            referencedColumnNames: id
+            constraintName: fk_owner_feature_feature
+
+  - changeSet:
+      id: fk-6
+      author: pavan
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: feature_strategy
+            baseColumnNames: feature_id
+            referencedTableName: feature
+            referencedColumnNames: id
+            constraintName: fk_feature_strategy_feature

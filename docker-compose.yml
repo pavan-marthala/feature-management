@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: future_management_db
+    environment:
+      POSTGRES_DB: future_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: future_management_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - future_net
+
+  app:
+    build: .
+    container_name: future_management_app
+    environment:
+      db_host: postgres
+      db_user: postgres
+      db_password: future_management_db
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - future_net
+
+volumes:
+  postgres_data:
+
+networks:
+  future_net:

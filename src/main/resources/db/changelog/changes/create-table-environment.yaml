@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: env-1
+      author: pavan
+      changes:
+        - createTable:
+            tableName: environment
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMP
+        - createTable:
+            tableName: environment_owner
+            columns:
+              - column:
+                  name: environment_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: owner_id
+                  type: BIGINT
+#                  constraints:
+#                    nullable: false
+        - addPrimaryKey:
+            tableName: environment_owner
+            columnNames: environment_id, owner_id
+            constraintName: pk_environment_owner
+#        - addForeignKeyConstraint:
+#            baseTableName: environment_owner
+#            baseColumnNames: environment_id
+#            referencedTableName: environment
+#            referencedColumnNames: id
+#            constraintName: fk_env_owner_env
+#        - addForeignKeyConstraint:
+#            baseTableName: environment_owner
+#            baseColumnNames: owner_id
+#            referencedTableName: owner
+#            referencedColumnNames: id
+#            constraintName: fk_env_owner_owner
