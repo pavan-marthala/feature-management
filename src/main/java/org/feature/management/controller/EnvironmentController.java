@@ -13,15 +13,15 @@ public class EnvironmentController {
     @Autowired
     private EnvironmentService environmentService;
 
-    @PutMapping("/{envId}/owners/{ownerId}")
-    public ResponseEntity<?> addOwnerToEnvironment(@PathVariable Long envId, @PathVariable Long ownerId) {
-        log.info("inside controller Adding owner {} to environment {}", ownerId, envId);
-        return ResponseEntity.ok(environmentService.assignOwnerToEnvironment(envId, ownerId));
+    @PutMapping("/{envId}/owners/{owner}")
+    public ResponseEntity<?> addOwnerToEnvironment(@PathVariable Long envId, @PathVariable String  owner) {
+        log.info("inside controller Adding owner {} to environment {}", owner, envId);
+        return ResponseEntity.ok(environmentService.assignOwnerToEnvironment(envId, owner));
     }
 
-    @DeleteMapping("/{envId}/owners/{ownerId}")
-    public ResponseEntity<?> removeOwnerFromEnvironment(@PathVariable Long envId, @PathVariable Long ownerId) {
-        log.info("inside controller Removing owner {} from environment {}", ownerId, envId);
-        return ResponseEntity.ok(environmentService.removeOwnerFromEnvironment(envId, ownerId));
+    @DeleteMapping("/{envId}/owners/{owner}")
+    public ResponseEntity<?> removeOwnerFromEnvironment(@PathVariable Long envId, @PathVariable String owner) {
+        log.info("inside controller Removing owner {} from environment {}", owner, envId);
+        return ResponseEntity.ok(environmentService.removeOwnerFromEnvironment(envId, owner));
     }
 }

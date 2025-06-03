@@ -27,13 +27,44 @@ databaseChangeLog:
               - column:
                   name: created_at
                   type: TIMESTAMP
+                  constraints:
+                    nullable: false
               - column:
                   name: modified_at
                   type: TIMESTAMP
-#
-#        - addForeignKeyConstraint:
-#            baseTableName: feature
-#            baseColumnNames: environment_id
-#            referencedTableName: environment
-#            referencedColumnNames: id
-#            constraintName: fk_feature_environment
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: feature_owners
+            columns:
+              - column:
+                  name: feature_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: owner
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: feature
+            baseColumnNames: environment_id
+            referencedTableName: environment
+            referencedColumnNames: id
+            constraintName: fk_feature_environment
+
+        - addForeignKeyConstraint:
+            baseTableName: feature_owners
+            baseColumnNames: feature_id
+            referencedTableName: feature
+            referencedColumnNames: id
+            constraintName: fk_feature_owners_feature
+            onDelete: CASCADE
+
+        - addPrimaryKey:
+            tableName: feature_owners
+            columnNames: feature_id, owner
+            constraintName: pk_feature_owners

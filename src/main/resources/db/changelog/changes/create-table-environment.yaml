@@ -21,11 +21,16 @@ databaseChangeLog:
               - column:
                   name: created_at
                   type: TIMESTAMP
+                  constraints:
+                    nullable: false
               - column:
                   name: modified_at
                   type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
         - createTable:
-            tableName: environment_owner
+            tableName: environment_owners
             columns:
               - column:
                   name: environment_id
@@ -33,23 +38,20 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: owner_id
-                  type: BIGINT
-#                  constraints:
-#                    nullable: false
+                  name: owner
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: environment_owners
+            baseColumnNames: environment_id
+            referencedTableName: environment
+            referencedColumnNames: id
+            constraintName: fk_environment_owners_environment
+            onDelete: CASCADE
+
         - addPrimaryKey:
-            tableName: environment_owner
-            columnNames: environment_id, owner_id
-            constraintName: pk_environment_owner
-#        - addForeignKeyConstraint:
-#            baseTableName: environment_owner
-#            baseColumnNames: environment_id
-#            referencedTableName: environment
-#            referencedColumnNames: id
-#            constraintName: fk_env_owner_env
-#        - addForeignKeyConstraint:
-#            baseTableName: environment_owner
-#            baseColumnNames: owner_id
-#            referencedTableName: owner
-#            referencedColumnNames: id
-#            constraintName: fk_env_owner_owner
+            tableName: environment_owners
+            columnNames: environment_id, owner
+            constraintName: pk_environment_owners

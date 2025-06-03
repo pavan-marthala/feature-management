@@ -2,34 +2,38 @@ package org.feature.management.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.feature.management.entity.Environment;
-import org.feature.management.entity.Owner;
+import org.feature.management.entity.EnvironmentEntity;
 import org.feature.management.exception.ResourceNotFoundException;
 import org.feature.management.repository.EnvironmentRepository;
-import org.feature.management.repository.OwnerRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class EnvironmentService {
     private final EnvironmentRepository environmentRepo;
-    private final OwnerRepository ownerRepo;
 
-    public Environment assignOwnerToEnvironment(Long envId, Long ownerId) {
-        log.info("Assigning owner {} to environment {}", ownerId, envId);
-        Environment env = environmentRepo.findById(envId).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + envId));
-        Owner owner = ownerRepo.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + ownerId));
+    public EnvironmentEntity assignOwnerToEnvironment(Long envId, String  owner) {
+        log.info("Assigning owner {} to environment {}", owner, envId);
+        EnvironmentEntity env = environmentRepo.findById(envId).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + envId));
+        if(env.getOwners() == null){
+            env.setOwners(new HashSet<>());
+        }
         env.getOwners().add(owner);
-        log.info("Owner {} assigned to environment {}", ownerId, envId);
+        log.info("Owner {} assigned to environment {}", owner, envId);
         return environmentRepo.save(env);
     }
 
-    public Environment removeOwnerFromEnvironment(Long envId, Long ownerId) {
+    public EnvironmentEntity removeOwnerFromEnvironment(Long envId, String ownerId) {
         log.info("Removing owner {} from environment {}", ownerId, envId);
-        Environment env = environmentRepo.findById(envId).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + envId));
-        Owner owner = ownerRepo.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + ownerId));
-        env.getOwners().remove(owner);
+        EnvironmentEntity env = environmentRepo.findById(envId).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + envId));
+        if(env.getOwners()!= null && env.getOwners().contains(ownerId)){
+            env.getOwners().remove(ownerId);
+        } else {
+            throw new ResourceNotFoundException("Owner not found in environment: " + envId);
+        }
         log.info("Owner {} removed from environment {}", ownerId, envId);
         return environmentRepo.save(env);
     }
