@@ -78,7 +78,7 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_schedule_strategy_strategy
 
-  # JWTClaimFeatureStrategyEntity table and embedded claims
+  # JWTClaimFeatureStrategyEntity table
   - changeSet:
       id: jwt_claim_feature_strategy-1
       author: pavan
@@ -100,9 +100,20 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_jwt_claim_strategy_strategy
 
+  # JWTClaimEntry
+  - changeSet:
+      id: jwt_claim_entries-1
+      author: pavan
+      changes:
         - createTable:
-            tableName: jwt_claims
+            tableName: jwt_claim_entries
             columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
               - column:
                   name: strategy_id
                   type: UUID
@@ -111,26 +122,81 @@ databaseChangeLog:
               - column:
                   name: name
                   type: VARCHAR(255)
+              - column:
+                  name: value
+                  type: VARCHAR(255)
+
+        - addForeignKeyConstraint:
+            baseTableName: jwt_claim_entries
+            baseColumnNames: strategy_id
+            referencedTableName: jwt_claim_feature_strategy
+            referencedColumnNames: id
+            constraintName: fk_jwt_claim_entries_strategy
+            onDelete: CASCADE
+
+  # JWT Claim Roles
+  - changeSet:
+      id: jwt_claim_roles-1
+      author: pavan
+      changes:
+        - createTable:
+            tableName: jwt_claim_roles
+            columns:
+              - column:
+                  name: claim_id
+                  type: UUID
                   constraints:
                     nullable: false
               - column:
-                  name: value
+                  name: role
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
 
         - addForeignKeyConstraint:
-            baseTableName: jwt_claims
-            baseColumnNames: strategy_id
-            referencedTableName: jwt_claim_feature_strategy
+            baseTableName: jwt_claim_roles
+            baseColumnNames: claim_id
+            referencedTableName: jwt_claim_entries
             referencedColumnNames: id
-            constraintName: fk_jwt_claims_strategy
+            constraintName: fk_jwt_claim_roles_claim
             onDelete: CASCADE
 
         - addPrimaryKey:
-            tableName: jwt_claims
-            columnNames: strategy_id, name
-            constraintName: pk_jwt_claims
+            tableName: jwt_claim_roles
+            columnNames: claim_id, role
+            constraintName: pk_jwt_claim_roles
+
+  # JWT Claim Scopes
+  - changeSet:
+      id: jwt_claim_scopes-1
+      author: pavan
+      changes:
+        - createTable:
+            tableName: jwt_claim_scopes
+            columns:
+              - column:
+                  name: claim_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: scope
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: jwt_claim_scopes
+            baseColumnNames: claim_id
+            referencedTableName: jwt_claim_entries
+            referencedColumnNames: id
+            constraintName: fk_jwt_claim_scopes_claim
+            onDelete: CASCADE
+
+        - addPrimaryKey:
+            tableName: jwt_claim_scopes
+            columnNames: claim_id, scope
+            constraintName: pk_jwt_claim_scopes
 
   # HTTPRequestFeatureStrategyEntity table and embedded fields
   - changeSet:
@@ -146,24 +212,18 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-
-              # For @Embedded HTTPHeader fields — example: header_name, header_value
               - column:
                   name: header_name
                   type: VARCHAR(255)
               - column:
                   name: header_value
                   type: VARCHAR(255)
-
-              # For @Embedded HTTPRequestBody fields — define fields inside HTTPRequestBody as columns here
               - column:
                   name: request_body_path
                   type: VARCHAR(255)
               - column:
                   name: request_body_value
                   type: TEXT
-
-              # For @Embedded HTTPQuery fields — example: query_param, query_value
               - column:
                   name: query_name
                   type: VARCHAR(255)

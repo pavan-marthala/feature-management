@@ -33,12 +33,9 @@ public abstract  class FeatureStrategyEntity {
     @Id
     @GeneratedValue
     private UUID id;
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "strategy_type")
-//    private StrategyType type;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feature_id", nullable = false)
     @JsonIgnore
     private FeatureEntity feature;
+
 }
