@@ -1,18 +1,19 @@
 package org.feature.management.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.feature.management.handlers.FeatureApi;
-import org.feature.management.models.EnvironmentsIdOwnersPostRequest;
+import org.feature.management.entity.FeatureEntity;
 import org.feature.management.models.Feature;
-import org.feature.management.models.FeatureRequest;
 import org.feature.management.models.FeaturesGet200Response;
-import org.feature.management.models.FeaturesIdPatchRequest;
 import org.feature.management.service.FeatureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -22,41 +23,42 @@ public class FeatureController {
     private FeatureService featureService;
 
     @PutMapping("/{featureId}/owners/{owner}")
-    public ResponseEntity<?> addOwnerToFeature(@PathVariable Long featureId, @PathVariable String owner) {
+    public ResponseEntity<?> addOwnerToFeature(@PathVariable UUID featureId, @PathVariable String owner) {
         log.info("Adding owner {} to feature {}", owner, featureId);
         return ResponseEntity.ok(featureService.assignOwnerToFeature(featureId, owner));
     }
 
-    @DeleteMapping("/{featureId}/owners/{ownerId}")
-    public ResponseEntity<?> removeOwnerFromFeature(@PathVariable Long featureId, @PathVariable String owner) {
+    @DeleteMapping("/{featureId}/owners/{owner}")
+    public ResponseEntity<?> removeOwnerFromFeature(@PathVariable UUID featureId, @PathVariable String owner) {
         log.info("Removing owner {} from feature {}", owner, featureId);
         return ResponseEntity.ok(featureService.removeOwnerFromFeature(featureId, owner));
     }
-
-    public ResponseEntity<FeaturesGet200Response> featuresGet(Integer page, Integer size, String _short, String shortBy) {
-        Page<Feature> featuresPage = featureService.getAllFeatures(page, size,_short,shortBy);
-        FeaturesGet200Response response = new FeaturesGet200Response();
-        response.setItems(featuresPage.getContent());
-        response.setTotalPages(featuresPage.getTotalPages());
-        response.setTotalItems((int) featuresPage.getTotalElements());
-        response.setPage(page);
-        response.setSize(size);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @GetMapping
+    public ResponseEntity<List<FeatureEntity>> featuresGet(Integer page, Integer size, String _short, String shortBy) {
+        Page<FeatureEntity> featuresPage = featureService.getAllFeatures(page, size,_short,shortBy);
+//        FeaturesGet200Response response = new FeaturesGet200Response();
+//        response.setItems(featuresPage.getContent());
+//        response.setTotalPages(featuresPage.getTotalPages());
+//        response.setTotalItems((int) featuresPage.getTotalElements());
+//        response.setPage(page);
+//        response.setSize(size);
+        return new ResponseEntity<>(featuresPage.getContent(), HttpStatus.OK);
     }
 
-    public ResponseEntity<Feature> featuresPost(FeatureRequest featureRequest) {
+    @PostMapping
+    public ResponseEntity<UUID> featuresPost(@Valid @RequestBody FeatureEntity featureRequest) {
         log.info("Creating feature: {}", featureRequest);
-        Feature createdFeature = featureService.createFeature(featureRequest);
-        return new ResponseEntity<>(createdFeature, HttpStatus.CREATED);
+        UUID uuid = featureService.createFeature(featureRequest);
+        return new ResponseEntity<>(uuid, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Feature> featuresIdGet(Long id) {
+    public ResponseEntity<Feature> featuresIdGet(UUID id) {
         log.info("Getting feature by ID: {}", id);
         Feature feature = featureService.getById(id);
         return ResponseEntity.ok(feature);
     }
 
-    public ResponseEntity<Void> featuresIdDelete(Long id, Integer ifMatch) {
+    public ResponseEntity<Void> featuresIdDelete(UUID id, Integer ifMatch) {
         log.info("Deleting feature by ID: {}, ifMatch: {}", id, ifMatch);
         featureService.deleteById(id, ifMatch);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

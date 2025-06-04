@@ -1,12 +1,8 @@
 package org.feature.management.enums;
 
 public enum StrategyType {
-    BOOLEAN,
-    USER,
-    USER_ROLE,
-    TIME_BASED,
-    DYNAMIC_EXPRESSION,
-    HTTP_HEADER,
-    PROTOCOL,
-    HTTP_REQUEST
+    BOOLEAN_FEATURE_STRATEGY,
+    JWT_CLAIM_FEATURE_STRATEGY,
+    HTTP_REQUEST_FEATTURE_STRATEGY,
+    SCHEDULE_FEATURE_STRATEGY,
 }

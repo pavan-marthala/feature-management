@@ -1,4 +1,4 @@
-openapi: 3.0.4
+openapi: 3.0.3
 info:
   title: 'Feature Management API specification'
   description: |
@@ -12,7 +12,6 @@ info:
     <li>Time based (Schedule)</li>
     <li>Dynamic Expression</li>
     <li>HTTP header based</li>
-    <li>Protocol based</li>
     <li>HTTP request based</li>
     </ul>
     
@@ -26,17 +25,12 @@ info:
   license:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
     name: Apache 2.0
-servers:
-  - url: http://localhost:8080/
-    description: Local
+
 tags:
   - name: Environment
     description: Manage feature environment
   - name: Feature
     description: Feature management
-  - name: Owner
-    description: Owner management
-
 paths:
   /environments:
     post:
@@ -106,7 +100,7 @@ paths:
         - $ref: '#/components/parameters/Id'
       responses:
         200:
-          description: Environment details
+          description: List of all environments
           headers:
             ETag:
               description: Entity tag for resource version
@@ -153,7 +147,7 @@ paths:
         403:
           description: Access forbidden - Permission required
         404:
-          description: Environment does not exist
+          description: Ennvironment does not exist
         409:
           description: Conflict – the resource has been modified by others
     delete:
@@ -185,18 +179,6 @@ paths:
         Add a new owner to environment
       parameters:
         - $ref: '#/components/parameters/Id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ownerId:
-                  type: integer
-                  format: int64
-                  description: Owner ID to add
-              required:
-                - ownerId
       responses:
         204:
           description: Environment updated successfully
@@ -212,7 +194,7 @@ paths:
         - Environment
       summary: Remove owner from a environment
       description: |
-        Remove owner from environment
+        Remove owner to environment to manage the environment
       parameters:
         - $ref: '#/components/parameters/Id'
         - $ref: '#/components/parameters/OwnerId'
@@ -228,38 +210,88 @@ paths:
           description: Environment or owner does not exist
         409:
           description: Conflict – the resource has been modified by others
+
   /features:
     post:
       tags:
         - Feature
       summary: Create feature
-      operationId: updatePet
       description: |
         Creates a new feature
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FeatureRequest'
+              $ref: '#/components/schemas/Feature'
             examples:
               BooleanFeature:
-                summary: Feature toggle with boolean
+                summary: Toggle based feature with boolean
                 value:
-                  name: "enable-new-ui"
-                  description: "Enable new user interface"
-                  enabled: true
-                  strategies:
-                    - strategyType: "BOOLEAN"
-                  owners:
-                    - username: "john_doe"
-                      email: "john.doe@example.com"
+                  type: BOOLEAN_FEATURE_STRATEGY
+                  strategy:
+                    value: false
+              JWTClaimUserFeature:
+                summary: User name based feature
+                value:
+                  type: JWT_CLAIM_FEATURE_STRATEGY
+                  strategy:
+                    value:
+                      claims:
+                        - name: username
+                          value: sam@tech-sam.com
+              JWTClaimRoleFeature:
+                summary: User role based feature
+                value:
+                  type: JWT_CLAIM_FEATURE_STRATEGY
+                  strategy:
+                    value:
+                      claims:
+                        - roles:
+                            - admin
+              HTTPRequestQueryFeature:
+                summary: HTTP query based feature
+                value:
+                  type: HTTP_REQUEST_FEATTURE_STRATEGY
+                  query:
+                    name: transportMode
+                    value: ROAD
+              HTTPRequestHeaderFeature:
+                summary: HTTP request header based feature
+                value:
+                  type: HTTP_REQUEST_FEATTURE_STRATEGY
+                  header:
+                    name: version
+                    value: 1
+              HTTPRequestBodyFeature:
+                summary: HTTP request body based feature
+                value:
+                  type: HTTP_REQUEST_FEATTURE_STRATEGY
+                  requestBody:
+                    path: product.type
+                    value: digital
+              HTTPRequestBodyWithArrayFeature:
+                summary: HTTP request body with array based feature
+                value:
+                  type: HTTP_REQUEST_FEATTURE_STRATEGY
+                  requestBody:
+                    path: product.delivery.status[]
+                    value: INPROGRESS, DELIVERED
+              ScheduleFeatureStrategy:
+                summary: Enabled feature based on time
+                value:
+                  type: SCHEDULE_FEATURE_STRATEGY
+                  requestBody:
+                    cron: 0 9 * * *
       responses:
         200:
           description: Feature created sucessfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feature'
+                type: object
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Feature/properties/id'
         400:
           description: Bad request
           content:
@@ -279,8 +311,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/size'
-        - $ref: '#/components/parameters/shortOrder'
-        - $ref: '#/components/parameters/featureShorting'
       responses:
         200:
           description: List of all features
@@ -297,13 +327,36 @@ paths:
                           $ref: '#/components/schemas/Feature'
         401:
           description: Unauthorized - Authentication required
+  /features/strategies:
+    get:
+      tags:
+        - Feature
+      summary: Get all strategy types
+      description: Get all strategy types
+      responses:
+        200:
+          description: Lif of strategies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      $ref: '#/components/schemas/FeatureStrategy'
+                    description:
+                      type: string
+                      description: Strategy description
+        401:
+          description: Unauthorized - Authentication required
   /features/{id}:
     get:
       tags:
         - Feature
       summary: Get feature details
       description: |
-        Returns the feature details.
+        Returns tje featire details.
       parameters:
         - $ref: '#/components/parameters/Id'
       responses:
@@ -336,20 +389,13 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  $ref: '#/components/schemas/Feature/properties/name'
-                description:
-                  $ref: '#/components/schemas/Feature/properties/description'
-                enabled:
-                  $ref: '#/components/schemas/Feature/properties/enabled'
+              oneOf:
+                -  $ref: '#/components/schemas/BooleanFeatureStrategy'
             examples:
-              UpdateFeature:
-                summary: Update feature properties
+              BooleanFeature:
+                summary: Feature toggle with boolean
                 value:
-                  enabled: false
-                  description: "Updated description"
+                  value: false
 
       responses:
         204:
@@ -385,7 +431,7 @@ paths:
         403:
           description: Access forbidden - Permission required
         404:
-          description: Feature does not exist
+          description: Feature not exist
         409:
           description: Conflict – the resource has been modified by others
   /features/{id}/owners:
@@ -397,18 +443,6 @@ paths:
         Add a new owner to feature
       parameters:
         - $ref: '#/components/parameters/Id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ownerId:
-                  type: integer
-                  format: int64
-                  description: Owner ID to add
-              required:
-                - ownerId
       responses:
         204:
           description: Owner added successfully
@@ -424,7 +458,7 @@ paths:
         - Feature
       summary: Remove owner from a feature
       description: |
-        Remove owner from feature management
+        Remove owner to manage the feature
       parameters:
         - $ref: '#/components/parameters/Id'
         - $ref: '#/components/parameters/OwnerId'
@@ -437,6 +471,7 @@ paths:
           description: Access forbidden - Permission required
         404:
           description: feature or owner does not exist
+
 components:
   schemas:
     Error:
@@ -448,13 +483,11 @@ components:
             - POST
             - PUT
             - PATCH
-            - GET
-            - DELETE
-          description: HTTP method
+          description: HTTP error code
           example: POST
         requestUri:
           type: string
-          description: URI path that caused the error
+          description: URI path caused the error
           example: /environments
         statusCode:
           type: number
@@ -493,7 +526,7 @@ components:
               message:
                 type: string
                 description: Reason for the error
-                example: name field requires min 3 letters
+                example: name field require min 3 letters
             required:
               - field
               - message
@@ -533,45 +566,17 @@ components:
         - required: [name]
         - required: [description]
     Owner:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Unique identifier for the owner
-          example: 1
-        username:
-          type: string
-          description: Owner username
-          example: "john_doe"
-        email:
-          type: string
-          format: email
-          description: Owner email address
-          example: "john.doe@example.com"
-        createdAt:
-          type: string
-          format: date-time
-          description: When the owner was created
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-        modifiedAt:
-          type: string
-          format: date-time
-          description: When the owner was last modified
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-      required:
-        - email
+      type: string
+      description: Owner id or name
+      example: owner1
     Environment:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
+          format: uuid
           description: Unique identifier for the environment
-          readOnly: true
-          example: 1
+          example: 550e8400-e29b-41d4-a716-446655440000
         name:
           type: string
           description: Environment name
@@ -589,148 +594,144 @@ components:
           items:
             $ref: '#/components/schemas/Owner'
           minItems: 1
-        createdAt:
-          type: string
-          format: date-time
-          description: When the environment was created
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-        modifiedAt:
-          type: string
-          format: date-time
-          description: When the environment was last modified
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-    StrategyType:
-      type: string
+
+    FeatureStrategy:
       description: |
         List of supported feature strategies.
         <ul>
-          <li><b>BOOLEAN</b> - This strategy is used to work based on boolean values <i>true</i> or <i>false</i></li>
-          <li><b>JWT_CLAIM</b> - This strategy is used to work based on JWT claim key and value. </li>
-          <li><b>HTTP_REQUEST</b> - This strategy is used to work based on HTTP request. That could be a URL path, header or request body</li>
-          <li><b>SCHEDULE</b> - This strategy is used to enable the feature only on the specific time</li>
-          <li><b>SCRIPT_ENGINE</b> - This strategy is used to enable or disable the feature based on dynamic conditions</li>
+          <li><b>BooleanFeatureStrategy</b> - This strategy is used to work based on boolean values <i>true</i> or <i>false</i></li>
+          <li><b>JWTClaimFeatureStrategy</b> - This strategy is used to work based on JWT claim key and value. </li>
+          <li><b>HTTPRequestFeatureStrategy</b> - This strategy is used to work based on HTTP request. That could be a URL path, header or request body</li>
+          <li><b>ScheduleFeatureStrategy</b> - This strategy is used to enable the feature only on the specific time</li>
+          <li><b>ScriptEngineFeatureStrategy</b> - This strategy is used to enable or disable the feature based on dynamic conditions</li>
         </ul>
       enum:
-        - BOOLEAN
-        - JWT_CLAIM
-        - HTTP_REQUEST
-        - SCHEDULE
-        - SCRIPT_ENGINE
-      example: BOOLEAN
-    FeatureStrategy:
+        - BOOLEAN_FEATURE_STRATEGY
+        - JWT_CLAIM_FEATURE_STRATEGY
+        - HTTP_REQUEST_FEATTURE_STRATEGY
+        - SCHEDULE_FEATURE_STRATEGY
+      example: BooleanFeatureStrategy
+    BooleanFeatureStrategy:
+      type: object
+      description: |
+        This strategy stores the feature value as either true or false.
+      properties:
+        value:
+          type: boolean
+          default: false
+          example: false
+      required:
+        - value
+    JWTClaimFeatureStrategy:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          description: Unique identifier for the strategy
-          readOnly: true
-          example: 1
-        strategyType:
-          $ref: '#/components/schemas/StrategyType'
-        createdAt:
+        value:
+          type: object
+          properties:
+            claims:
+              type: array
+              items:
+                oneOf:
+                  - type: object
+                    properties:
+                      scopes:
+                        type: array
+                        items:
+                          type: string
+                    required:
+                      - scopes
+                  - type: object
+                    properties:
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                    required:
+                      - roles
+                  - type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                        - name
+                        - value
+          required:
+            - claims
+    HTTPRequestFeatureStrategy:
+      type: object
+      properties:
+        header:
+          type: object
+          properties:
+            name:
+              type: string
+            value:
+              type: string
+          required:
+            - name
+            - value
+        requestBody:
+          type: object
+          properties:
+            path:
+              type: string
+            value:
+              type: string
+          required:
+            - path
+            - value
+        query:
+          type: object
+          properties:
+            name:
+              type: string
+            value:
+              type: string
+          required:
+            - name
+            - value
+      anyOf:
+        - required: [header]
+        - required: [requestBody]
+        - required: [query]
+    ScheduleFeatureStrategy:
+      type: object
+      properties:
+        cron:
           type: string
-          format: date-time
-          description: When the strategy was created
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-        modifiedAt:
-          type: string
-          format: date-time
-          description: When the strategy was last modified
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-      required:
-        - strategyType
+
     Feature:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-          description: Unique identifier for the feature
-          readOnly: true
-          example: 1
-        name:
           type: string
-          description: Feature name
-          example: "enable-new-ui"
-          minLength: 2
-          maxLength: 100
-        description:
-          type: string
-          description: Feature description
-          maxLength: 500
-          example: "Enable the new user interface"
-        enabled:
-          type: boolean
-          description: true or false to indicate if the feature is enabled or not
-          example: true
-          default: false
-        environment:
-          $ref: '#/components/schemas/Environment'
-        strategies:
-          type: array
-          description: List of strategies associated with this feature
-          items:
-            $ref: '#/components/schemas/FeatureStrategy'
+          format: uuid
+        type:
+          $ref: '#/components/schemas/FeatureStrategy'
+        strategy:
+          oneOf:
+            -  $ref: '#/components/schemas/BooleanFeatureStrategy'
+            -  $ref: '#/components/schemas/JWTClaimFeatureStrategy'
+            -  $ref: '#/components/schemas/HTTPRequestFeatureStrategy'
+            -  $ref: '#/components/schemas/ScheduleFeatureStrategy'
         owners:
           type: array
-          description: Owners who can manage the feature
+          description: Owners who can manage the fature
           items:
             $ref: '#/components/schemas/Owner'
           minItems: 1
-        createdAt:
-          type: string
-          format: date-time
-          description: When the feature was created
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-        modifiedAt:
-          type: string
-          format: date-time
-          description: When the feature was last modified
-          readOnly: true
-          example: "2025-05-19T14:30:00Z"
-      required:
-        - name
-        - enabled
-    FeatureRequest:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/Feature/properties/name'
-        description:
-          $ref: '#/components/schemas/Feature/properties/description'
         enabled:
-          $ref: '#/components/schemas/Feature/properties/enabled'
-        owners:
-          type: array
-          items:
-            type: object
-            properties:
-              username:
-                $ref: '#/components/schemas/Owner/properties/username'
-              email:
-                $ref: '#/components/schemas/Owner/properties/email'
-            required:
-              - username
-              - email
-        strategies:
-          type: array
-          items:
-            type: object
-            properties:
-              strategyType:
-                $ref: '#/components/schemas/StrategyType'
-            required:
-              - strategyType
+          type: boolean
+          description: true of false to indicated the feature is enabled or not
+          example: true
+
       required:
-        - name
-        - enabled
-        - strategies
+        - type
+        - strategy
   parameters:
     Id:
       name: id
@@ -738,16 +739,15 @@ components:
       required: true
       description: Unique identifier
       schema:
-        type: integer
-        format: int64
+        type: string
+        format: uuid
     OwnerId:
       name: ownerId
       in: path
       required: true
       description: owner id
       schema:
-        type: integer
-        format: int64
+        type: string
     Page:
       name: page
       in: query
@@ -755,8 +755,8 @@ components:
       required: false
       schema:
         type: integer
-        minimum: 0
-        default: 0
+        minimum: 1
+        default: 1
     size:
       name: size
       in: query
@@ -767,22 +767,6 @@ components:
         minimum: 1
         maximum: 100
         default: 20
-    shortOrder:
-      name: short
-      in: query
-      description: Sorting order; use 'asc' for ascending or 'desc' for descending.
-      required: false
-      schema:
-        type: string
-        default: desc
-    featureShorting:
-      name: shortBy
-      in: query
-      description: Field name to sort the results by (e.g., 'id', 'name', 'createdAt').
-      required: false
-      schema:
-        type: string
-        default: id
     IfMatch:
       name: If-Match
       in: header

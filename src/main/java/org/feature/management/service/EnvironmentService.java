@@ -8,6 +8,7 @@ import org.feature.management.repository.EnvironmentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -15,7 +16,7 @@ import java.util.HashSet;
 public class EnvironmentService {
     private final EnvironmentRepository environmentRepo;
 
-    public EnvironmentEntity assignOwnerToEnvironment(Long envId, String  owner) {
+    public EnvironmentEntity assignOwnerToEnvironment(UUID envId, String  owner) {
         log.info("Assigning owner {} to environment {}", owner, envId);
         EnvironmentEntity env = environmentRepo.findById(envId).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + envId));
         if(env.getOwners() == null){
@@ -26,7 +27,7 @@ public class EnvironmentService {
         return environmentRepo.save(env);
     }
 
-    public EnvironmentEntity removeOwnerFromEnvironment(Long envId, String ownerId) {
+    public EnvironmentEntity removeOwnerFromEnvironment(UUID envId, String ownerId) {
         log.info("Removing owner {} from environment {}", ownerId, envId);
         EnvironmentEntity env = environmentRepo.findById(envId).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + envId));
         if(env.getOwners()!= null && env.getOwners().contains(ownerId)){

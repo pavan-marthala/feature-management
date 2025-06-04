@@ -8,8 +8,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "environment")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @ToString
@@ -19,7 +20,7 @@ import java.util.Set;
 public class EnvironmentEntity {
     @Id
     @GeneratedValue
-    private Long id;
+    private UUID id;
 
     private String name;
     private String description;

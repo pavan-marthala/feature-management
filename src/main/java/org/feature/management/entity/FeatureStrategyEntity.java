@@ -1,36 +1,44 @@
 package org.feature.management.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 import lombok.*;
+import org.feature.management.entity.strategies.BooleanFeatureStrategyEntity;
+import org.feature.management.entity.strategies.HTTPRequestFeatureStrategyEntity;
+import org.feature.management.entity.strategies.JWTClaimFeatureStrategyEntity;
+import org.feature.management.entity.strategies.ScheduleFeatureStrategyEntity;
 import org.feature.management.enums.StrategyType;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
+import java.util.UUID;
 
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Data
+@Entity(name = "feature_strategy")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "strategy_type")
+@Getter
+@Setter
 @ToString(exclude = "feature")
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class FeatureStrategyEntity {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = BooleanFeatureStrategyEntity.class, name = "BOOLEAN_FEATURE_STRATEGY"),
+        @JsonSubTypes.Type(value = JWTClaimFeatureStrategyEntity.class, name = "JWT_CLAIM_FEATURE_STRATEGY"),
+        @JsonSubTypes.Type(value = HTTPRequestFeatureStrategyEntity.class, name = "HTTP_REQUEST_FEATTURE_STRATEGY"),
+        @JsonSubTypes.Type(value = ScheduleFeatureStrategyEntity.class, name = "SCHEDULE_FEATURE_STRATEGY")
+})
+public abstract  class FeatureStrategyEntity {
     @Id
     @GeneratedValue
-    private Long id;
-    @Enumerated(EnumType.STRING)
-    private StrategyType strategyType;
+    private UUID id;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "strategy_type")
+//    private StrategyType type;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feature_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private FeatureEntity feature;
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
-    @LastModifiedDate
-    @Column(nullable = false)
-    private Instant modifiedAt;
 }

@@ -8,7 +8,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: BIGINT
+                  type: UUID
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -34,7 +34,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: environment_id
-                  type: BIGINT
+                  type: UUID
                   constraints:
                     nullable: false
               - column:

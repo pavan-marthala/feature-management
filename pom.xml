@@ -101,7 +101,7 @@
 							<generatorName>spring</generatorName>
 							<library>spring-boot</library>
 							<output>${project.build.directory}/generated-sources/openapi</output>
-<!--							<apiPackage>org.feature.management.handlers</apiPackage>-->
+							<apiPackage>org.feature.management.handlers</apiPackage>
 							<modelPackage>org.feature.management.models</modelPackage>
 							<invokerPackage>org.feature.management.handlers</invokerPackage>
 							<configOptions>
