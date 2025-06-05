@@ -22,3 +22,9 @@ pagination:
   default-page: 0
   default-shortOrder: desc
   default-featureShorting: id
+
+logging:
+  level:
+    com:
+      fasterxml:
+        jackson: DEBUG

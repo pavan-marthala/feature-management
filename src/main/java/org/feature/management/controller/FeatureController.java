@@ -52,13 +52,15 @@ public class FeatureController {
         return new ResponseEntity<>(uuid, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Feature> featuresIdGet(UUID id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Feature> featuresIdGet(@PathVariable("id") UUID id) {
         log.info("Getting feature by ID: {}", id);
         Feature feature = featureService.getById(id);
         return ResponseEntity.ok(feature);
     }
 
-    public ResponseEntity<Void> featuresIdDelete(UUID id, Integer ifMatch) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> featuresIdDelete(@PathVariable("id") UUID id, @RequestHeader(value = "If-Match") Integer ifMatch) {
         log.info("Deleting feature by ID: {}, ifMatch: {}", id, ifMatch);
         featureService.deleteById(id, ifMatch);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

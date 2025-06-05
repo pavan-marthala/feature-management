@@ -13,6 +13,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"strategy"})
+@EqualsAndHashCode(exclude = {"strategy"})
 public class JWTClaimEntry implements Serializable {
 
     @Id
@@ -36,16 +38,4 @@ public class JWTClaimEntry implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strategy_id")
     private JWTClaimFeatureStrategyEntity strategy;
-
-    public boolean isKeyValue() {
-        return name != null && value != null;
-    }
-
-    public boolean isRoleBased() {
-        return roles != null && !roles.isEmpty();
-    }
-
-    public boolean isScopeBased() {
-        return scopes != null && !scopes.isEmpty();
-    }
 }

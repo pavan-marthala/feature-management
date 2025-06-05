@@ -43,6 +43,16 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(FeatureException.class)
+    public ResponseEntity<Error> handleFeatureException(FeatureException ex, HttpServletRequest request) {
+        log.error("Feature Exception {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+
+        Error error = createBaseError(request, HttpStatus.NOT_FOUND);
+        error.setErrorMessage(ex.getMessage());
+        error.setDetailedErrors(null);
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Error> handleIOException(IOException ex, HttpServletRequest request) {

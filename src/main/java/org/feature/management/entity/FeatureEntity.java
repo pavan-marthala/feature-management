@@ -1,5 +1,7 @@
 package org.feature.management.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.feature.management.enums.StrategyType;
@@ -15,11 +17,12 @@ import java.util.UUID;
 @Entity(name = "feature")
 @EntityListeners(AuditingEntityListener.class)
 @Data
-//@ToString(exclude = { "strategies"})
-//@EqualsAndHashCode(exclude = { "strategies"})
+@ToString(exclude = { "strategy"})
+@EqualsAndHashCode(exclude = { "strategy"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FeatureEntity {
     @Id
     @GeneratedValue
@@ -35,8 +38,9 @@ public class FeatureEntity {
     @CollectionTable(name = "feature_owners", joinColumns = @JoinColumn(name = "feature_id"))
     @Column(name = "owner")
     private Set<String> owners;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "feature", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "strategy_id")
+    @JsonProperty("strategy")
     private FeatureStrategyEntity strategy;
     @CreatedDate
     @Column(nullable = false, updatable = false)

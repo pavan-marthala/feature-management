@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feature.management.entity.FeatureEntity;
+import org.feature.management.entity.FeatureStrategyEntity;
+import org.feature.management.entity.strategies.JWTClaimEntry;
+import org.feature.management.entity.strategies.JWTClaimFeatureStrategyEntity;
+import org.feature.management.exception.FeatureException;
 import org.feature.management.exception.ResourceNotFoundException;
 import org.feature.management.repository.FeatureRepository;
 import org.springframework.data.domain.*;
@@ -62,14 +66,22 @@ public class FeatureService {
     public UUID createFeature(FeatureEntity featureRequest) {
         log.info("Creating feature with request: {}", featureRequest);
 
+        if (featureRequest.getStrategy() == null) {
+            log.error("Strategy is NULL in the request! This is the root cause of the issue.");
+            throw new FeatureException("Strategy cannot be null");
+        }
+
+        log.info("Strategy received: {}", featureRequest.getStrategy());
+
         FeatureEntity feature = FeatureEntity.builder()
                 .enabled(featureRequest.isEnabled())
+                .type(featureRequest.getType())
                 .owners(featureRequest.getOwners())
+                .environment(featureRequest.getEnvironment())
                 .strategy(featureRequest.getStrategy())
                 .build();
-        if (feature.getStrategy() != null) {
-            feature.getStrategy().setFeature(feature);
-        }
+        feature.getStrategy().setFeature(feature);
+
         FeatureEntity savedFeature = featureRepo.save(feature);
         log.info("Feature created with ID: {}", savedFeature.getId());
 
@@ -86,6 +98,6 @@ public class FeatureService {
     public void deleteById(UUID id, Integer ifMatch) {
         log.info("Deleting feature by id: {}, ifMatch: {}", id, ifMatch);
         FeatureEntity feature = featureRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + id));
-        featureRepo.delete(feature);
+        featureRepo.deleteById(id);
     }
 }
