@@ -1,9 +1,11 @@
 package org.feature.management.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feature.management.entity.EnvironmentEntity;
 import org.feature.management.exception.ResourceNotFoundException;
+import org.feature.management.models.Environment;
 import org.feature.management.repository.EnvironmentRepository;
 import org.springframework.stereotype.Service;
 
@@ -37,5 +39,9 @@ public class EnvironmentService {
         }
         log.info("Owner {} removed from environment {}", ownerId, envId);
         return environmentRepo.save(env);
+    }
+
+    public EnvironmentEntity createEnvironment(@Valid Environment env) {
+        return null;
     }
 }

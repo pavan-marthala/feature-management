@@ -3,7 +3,7 @@ package org.feature.management.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.feature.management.models.Error;
-import org.feature.management.models.ErrorDetailedErrorsInner;
+import org.feature.management.models.ErrorDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,7 +24,7 @@ public class CustomExceptionHandler {
     public ResponseEntity<Error> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         log.error("Validation errors occurred for request {} {}: {}",
                 request.getMethod(), request.getRequestURI(), ex.getBindingResult());
-        List<ErrorDetailedErrorsInner> detailedErrors = getErrorDetailedErrorsInners(ex);
+        List<ErrorDetails> detailedErrors = getErrorDetailedErrorsInners(ex);
         Error error = createBaseError(request, HttpStatus.BAD_REQUEST);
         error.setErrorMessage("Validation failed for request. See detailedErrors for more information.");
         error.setDetailedErrors(detailedErrors);
@@ -78,10 +78,10 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private List<ErrorDetailedErrorsInner> getErrorDetailedErrorsInners(MethodArgumentNotValidException ex) {
+    private List<ErrorDetails> getErrorDetailedErrorsInners(MethodArgumentNotValidException ex) {
         return ex.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> {
-                    ErrorDetailedErrorsInner errorDetail = new ErrorDetailedErrorsInner();
+                    ErrorDetails errorDetail = new ErrorDetails();
                     errorDetail.setField(fieldError.getField());
                     errorDetail.setValue(fieldError.getRejectedValue() != null ?
                             fieldError.getRejectedValue().toString() : "null");

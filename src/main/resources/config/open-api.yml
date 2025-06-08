@@ -474,6 +474,28 @@ paths:
 
 components:
   schemas:
+    ErrorDetails:
+        type: object
+        properties:
+          errorCode:
+            type: string
+            description: application specific error code
+            example: VE001
+          field:
+            type: string
+            description: field name which caused the error
+            example: name
+          value:
+            type: string
+            description: field value
+            example: de
+          message:
+            type: string
+            description: Reason for the error
+            example: name field require min 3 letters
+        required:
+          - field
+          - message
     Error:
       type: object
       properties:
@@ -509,27 +531,8 @@ components:
         detailedErrors:
           type: array
           items:
-            type: object
-            properties:
-              errorCode:
-                type: string
-                description: application specific error code
-                example: VE001
-              field:
-                type: string
-                description: field name which caused the error
-                example: name
-              value:
-                type: string
-                description: field value
-                example: de
-              message:
-                type: string
-                description: Reason for the error
-                example: name field require min 3 letters
-            required:
-              - field
-              - message
+            $ref: '#/components/schemas/ErrorDetails'
+
       required:
         - httpMethod
         - requestUri
@@ -608,7 +611,7 @@ components:
       enum:
         - BOOLEAN_FEATURE_STRATEGY
         - JWT_CLAIM_FEATURE_STRATEGY
-        - HTTP_REQUEST_FEATTURE_STRATEGY
+        - HTTP_REQUEST_FEATURE_STRATEGY
         - SCHEDULE_FEATURE_STRATEGY
       example: BooleanFeatureStrategy
     BooleanFeatureStrategy:
@@ -710,17 +713,28 @@ components:
         id:
           type: string
           format: uuid
-        type:
-          $ref: '#/components/schemas/FeatureStrategy'
+        name:
+          type: string
+          description: Feature name
+          example: NewFeature
+          minLength: 2
+          maxLength: 36
+          pattern: '^[a-zA-Z0-9]+$'
+        description:
+          type: string
+          description: Feature description
+          maxLength: 255
         strategy:
+          $ref: '#/components/schemas/FeatureStrategy'
+        configuration:
           oneOf:
-            -  $ref: '#/components/schemas/BooleanFeatureStrategy'
-            -  $ref: '#/components/schemas/JWTClaimFeatureStrategy'
-            -  $ref: '#/components/schemas/HTTPRequestFeatureStrategy'
-            -  $ref: '#/components/schemas/ScheduleFeatureStrategy'
+            - $ref: '#/components/schemas/BooleanFeatureStrategy'
+            - $ref: '#/components/schemas/JWTClaimFeatureStrategy'
+            - $ref: '#/components/schemas/HTTPRequestFeatureStrategy'
+            - $ref: '#/components/schemas/ScheduleFeatureStrategy'
         owners:
           type: array
-          description: Owners who can manage the fature
+          description: Owners who can manage the feature
           items:
             $ref: '#/components/schemas/Owner'
           minItems: 1
@@ -728,7 +742,10 @@ components:
           type: boolean
           description: true of false to indicated the feature is enabled or not
           example: true
-
+        etag:
+          type: string
+          description: Entity tag for optimistic concurrency control
+          example: '1'
       required:
         - type
         - strategy

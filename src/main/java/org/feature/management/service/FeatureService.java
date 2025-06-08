@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feature.management.entity.FeatureEntity;
-import org.feature.management.entity.FeatureStrategyEntity;
-import org.feature.management.entity.strategies.JWTClaimEntry;
-import org.feature.management.entity.strategies.JWTClaimFeatureStrategyEntity;
 import org.feature.management.exception.FeatureException;
 import org.feature.management.exception.ResourceNotFoundException;
 import org.feature.management.repository.FeatureRepository;
@@ -14,8 +11,10 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -28,10 +27,9 @@ public class FeatureService {
     public FeatureEntity assignOwnerToFeature(UUID featureId, String owner) {
         log.info("Assigning owner {} to feature {}", owner, featureId);
         FeatureEntity feature = featureRepo.findById(featureId).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + featureId));
-        if(feature.getOwners() == null){
-            feature.setOwners(new HashSet<>());
-        }
-        feature.getOwners().add(owner);
+        var owners = Optional.ofNullable(feature.getOwners()).orElse(new HashSet<>());
+        owners.add(owner);
+        feature.setOwners(owners);
         log.info("Owner {} assigned to feature {}", owner, featureId);
         return featureRepo.save(feature);
     }
@@ -39,7 +37,7 @@ public class FeatureService {
     public FeatureEntity removeOwnerFromFeature(UUID featureId, String owner) {
         log.info("Removing owner {} from feature {}", owner, featureId);
         FeatureEntity feature = featureRepo.findById(featureId).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + featureId));
-        if(feature.getOwners()!= null && feature.getOwners().contains(owner)){
+        if (feature.getOwners() != null && feature.getOwners().contains(owner)) {
             feature.getOwners().remove(owner);
         } else {
             throw new ResourceNotFoundException("Owner not found in environment: " + featureId);
@@ -55,7 +53,7 @@ public class FeatureService {
 
         List<FeatureEntity> mappedList = featuresPage
                 .stream()
-               // .map(feature -> mapper.convertValue(feature, org.feature.management.models.Feature.class))
+                // .map(feature -> mapper.convertValue(feature, org.feature.management.models.Feature.class))
                 .toList();
 
         return new PageImpl<>(mappedList, pageable, featuresPage.getTotalElements());

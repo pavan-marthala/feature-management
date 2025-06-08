@@ -99,17 +99,23 @@
 						<configuration>
 							<inputSpec>${project.basedir}/src/main/resources/config/open-api.yml</inputSpec>
 							<generatorName>spring</generatorName>
-							<library>spring-boot</library>
-							<output>${project.build.directory}/generated-sources/openapi</output>
-							<apiPackage>org.feature.management.handlers</apiPackage>
+							<generateApis>false</generateApis>
+							<generateSupportingFiles>false</generateSupportingFiles>
+							<generateModelTests>false</generateModelTests>
 							<modelPackage>org.feature.management.models</modelPackage>
-							<invokerPackage>org.feature.management.handlers</invokerPackage>
+							<!--<library>spring-boot</library>-->
+							<skipValidateSpec>true</skipValidateSpec>
 							<configOptions>
-								<library>spring-boot</library>
-								<dateLibrary>java8</dateLibrary>
-								<useTags>true</useTags>
+								<generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
 								<useJakartaEe>true</useJakartaEe>
-								<interfaceOnly>true</interfaceOnly>
+								<performBeanValidation>true</performBeanValidation>
+								<!--suppress UnresolvedMavenProperty -->
+								<additionalModelTypeAnnotations>
+									@lombok.Builder(toBuilder = true)
+									@lombok.AllArgsConstructor
+									@lombok.NoArgsConstructor
+								</additionalModelTypeAnnotations>
+								<openApiNullable>false</openApiNullable>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -160,25 +166,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/openapi</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 		</plugins>
 	</build>
 	<reporting>
