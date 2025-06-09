@@ -53,6 +53,16 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(EnvironmentException.class)
+    public ResponseEntity<Error> handleEnvironmentException(EnvironmentException ex, HttpServletRequest request) {
+        log.error("Environment Exception {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+
+        Error error = createBaseError(request, HttpStatus.BAD_REQUEST);
+        error.setErrorMessage(ex.getMessage());
+        error.setDetailedErrors(null);
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Error> handleIOException(IOException ex, HttpServletRequest request) {

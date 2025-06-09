@@ -19,6 +19,15 @@ databaseChangeLog:
                   name: description
                   type: VARCHAR(255)
               - column:
+                  name: owners
+                  type: JSONB
+              - column:
+                  name: etag
+                  type: BIGINT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
                   name: created_at
                   type: TIMESTAMP
                   constraints:
@@ -28,30 +37,3 @@ databaseChangeLog:
                   type: TIMESTAMP
                   constraints:
                     nullable: false
-
-        - createTable:
-            tableName: environment_owners
-            columns:
-              - column:
-                  name: environment_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
-                  name: owner
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-
-        - addForeignKeyConstraint:
-            baseTableName: environment_owners
-            baseColumnNames: environment_id
-            referencedTableName: environment
-            referencedColumnNames: id
-            constraintName: fk_environment_owners_environment
-            onDelete: CASCADE
-
-        - addPrimaryKey:
-            tableName: environment_owners
-            columnNames: environment_id, owner
-            constraintName: pk_environment_owners

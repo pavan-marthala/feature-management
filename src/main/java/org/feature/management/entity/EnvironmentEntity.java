@@ -2,6 +2,8 @@ package org.feature.management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,19 +20,27 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class EnvironmentEntity {
+
     @Id
     @GeneratedValue
     private UUID id;
 
     private String name;
+
     private String description;
-    @ElementCollection
-    @CollectionTable(name = "environment_owners", joinColumns = @JoinColumn(name = "environment_id"))
-    @Column(name = "owner")
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     private Set<String> owners;
+
+    @Version
+    @Column(nullable = false)
+    private Long etag;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private Instant modifiedAt;

@@ -505,6 +505,8 @@ components:
             - POST
             - PUT
             - PATCH
+            - DELETE
+            - GET
           description: HTTP error code
           example: POST
         requestUri:
@@ -565,9 +567,12 @@ components:
           $ref: '#/components/schemas/Environment/properties/name'
         description:
           $ref: '#/components/schemas/Environment/properties/description'
+        owners:
+          $ref: '#/components/schemas/Environment/properties/owners'
       anyOf:
         - required: [name]
         - required: [description]
+        - required: [owners]
     Owner:
       type: string
       description: Owner id or name
@@ -597,6 +602,10 @@ components:
           items:
             $ref: '#/components/schemas/Owner'
           minItems: 1
+        etag:
+          type: integer
+          description: Entity tag for optimistic concurrency control
+          example: 1
 
     FeatureStrategy:
       description: |
@@ -743,9 +752,9 @@ components:
           description: true of false to indicated the feature is enabled or not
           example: true
         etag:
-          type: string
+          type: integer
           description: Entity tag for optimistic concurrency control
-          example: '1'
+          example: 1
       required:
         - type
         - strategy
