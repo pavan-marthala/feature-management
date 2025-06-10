@@ -67,10 +67,10 @@ public class CustomExceptionHandler {
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Error> handleIOException(IOException ex, HttpServletRequest request) {
         log.error("IO error occurred for request {} {}: {}",
-                request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
+                request.getMethod(), request.getRequestURI(), ex.getMessage());
 
         Error error = createBaseError(request, HttpStatus.INTERNAL_SERVER_ERROR);
-        error.setErrorMessage("An IO error occurred while processing the request");
+        error.setErrorMessage(ex.getMessage());
         error.setDetailedErrors(null);
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -78,11 +78,10 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Error> handleGeneralException(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error occurred for request {} {}: {}",
-                request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
+        log.error("Unexpected error occurred for request {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
 
         Error error = createBaseError(request, HttpStatus.INTERNAL_SERVER_ERROR);
-        error.setErrorMessage("An unexpected error occurred while processing the request");
+        error.setErrorMessage(ex.getMessage());
         error.setDetailedErrors(null);
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);

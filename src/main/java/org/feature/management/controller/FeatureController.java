@@ -34,8 +34,8 @@ public class FeatureController {
         return ResponseEntity.ok(featureService.removeOwnerFromFeature(featureId, owner));
     }
     @GetMapping
-    public ResponseEntity<List<FeatureEntity>> featuresGet(Integer page, Integer size, String _short, String shortBy) {
-        Page<FeatureEntity> featuresPage = featureService.getAllFeatures(page, size,_short,shortBy);
+    public ResponseEntity<List<FeatureEntity>> featuresGet(@RequestParam(value = "page",defaultValue = "0") Integer page,@RequestParam(value = "size",defaultValue = "40") Integer size) {
+        Page<FeatureEntity> featuresPage = featureService.getAllFeatures(page, size);
 //        FeaturesGet200Response response = new FeaturesGet200Response();
 //        response.setItems(featuresPage.getContent());
 //        response.setTotalPages(featuresPage.getTotalPages());
@@ -53,10 +53,9 @@ public class FeatureController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Feature> featuresIdGet(@PathVariable("id") UUID id) {
+    public FeatureEntity featuresIdGet(@PathVariable("id") UUID id) {
         log.info("Getting feature by ID: {}", id);
-        Feature feature = featureService.getById(id);
-        return ResponseEntity.ok(feature);
+        return featureService.getById(id);
     }
 
     @DeleteMapping("/{id}")

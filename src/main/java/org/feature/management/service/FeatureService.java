@@ -46,9 +46,9 @@ public class FeatureService {
         return featureRepo.save(feature);
     }
 
-    public Page<FeatureEntity> getAllFeatures(Integer page, Integer size, String _short, String shortBy) {
-        log.info("Fetching features with pagination, page: {}, size: {}, short: {}, sortBy: {}", page, size, _short, shortBy);
-        Pageable pageable = PageRequest.of(page, size, _short.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, shortBy);
+    public Page<FeatureEntity> getAllFeatures(Integer page, Integer size) {
+        log.info("Fetching features with pagination, page: {}, size: {}", page, size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<FeatureEntity> featuresPage = featureRepo.findAll(pageable);
 
         List<FeatureEntity> mappedList = featuresPage
@@ -72,13 +72,14 @@ public class FeatureService {
         log.info("Strategy received: {}", featureRequest.getStrategy());
 
         FeatureEntity feature = FeatureEntity.builder()
+                .name(featureRequest.getName())
+                .description(featureRequest.getDescription())
                 .enabled(featureRequest.isEnabled())
-                .type(featureRequest.getType())
-                .owners(featureRequest.getOwners())
-                .environment(featureRequest.getEnvironment())
                 .strategy(featureRequest.getStrategy())
+                .owners(featureRequest.getOwners())
+                .configuration(featureRequest.getConfiguration())
+//                .environment(featureRequest.getEnvironment())
                 .build();
-        feature.getStrategy().setFeature(feature);
 
         FeatureEntity savedFeature = featureRepo.save(feature);
         log.info("Feature created with ID: {}", savedFeature.getId());
@@ -87,10 +88,9 @@ public class FeatureService {
     }
 
 
-    public org.feature.management.models.Feature getById(UUID id) {
+    public FeatureEntity getById(UUID id) {
         log.info("Fetching feature by id: {}", id);
-        FeatureEntity feature = featureRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + id));
-        return mapper.convertValue(feature, org.feature.management.models.Feature.class);
+        return featureRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + id));
     }
 
     public void deleteById(UUID id, Integer ifMatch) {

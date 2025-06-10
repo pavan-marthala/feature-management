@@ -4,7 +4,7 @@ spring:
   application:
     name: Future Management
   datasource:
-    url: jdbc:postgresql://${db_host:localhost}:5432/future_management
+    url: jdbc:postgresql://${db_host:192.168.0.118}:5432/future_management
     username: ${db_user:postgres}
     password: ${db_password:Pavan@2001}
     driver-class-name: org.postgresql.Driver
@@ -25,6 +25,6 @@ pagination:
 
 logging:
   level:
-    com:
-      fasterxml:
-        jackson: DEBUG
+    com.fasterxml.jackson: DEBUG
+    org.hibernate.type.descriptor.converter: DEBUG
+    org.hibernate.SQL: DEBUG
