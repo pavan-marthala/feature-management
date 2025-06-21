@@ -217,65 +217,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Feature'
-            examples:
-              BooleanFeature:
-                summary: Toggle based feature with boolean
-                value:
-                  type: BOOLEAN_FEATURE_STRATEGY
-                  strategy:
-                    value: false
-              JWTClaimUserFeature:
-                summary: User name based feature
-                value:
-                  type: JWT_CLAIM_FEATURE_STRATEGY
-                  strategy:
-                    value:
-                      claims:
-                        - name: username
-                          value: sam@tech-sam.com
-              JWTClaimRoleFeature:
-                summary: User role based feature
-                value:
-                  type: JWT_CLAIM_FEATURE_STRATEGY
-                  strategy:
-                    value:
-                      claims:
-                        - roles:
-                            - admin
-              HTTPRequestQueryFeature:
-                summary: HTTP query based feature
-                value:
-                  type: HTTP_REQUEST_FEATTURE_STRATEGY
-                  query:
-                    name: transportMode
-                    value: ROAD
-              HTTPRequestHeaderFeature:
-                summary: HTTP request header based feature
-                value:
-                  type: HTTP_REQUEST_FEATTURE_STRATEGY
-                  header:
-                    name: version
-                    value: 1
-              HTTPRequestBodyFeature:
-                summary: HTTP request body based feature
-                value:
-                  type: HTTP_REQUEST_FEATTURE_STRATEGY
-                  requestBody:
-                    path: product.type
-                    value: digital
-              HTTPRequestBodyWithArrayFeature:
-                summary: HTTP request body with array based feature
-                value:
-                  type: HTTP_REQUEST_FEATTURE_STRATEGY
-                  requestBody:
-                    path: product.delivery.status[]
-                    value: INPROGRESS, DELIVERED
-              ScheduleFeatureStrategy:
-                summary: Enabled feature based on time
-                value:
-                  type: SCHEDULE_FEATURE_STRATEGY
-                  requestBody:
-                    cron: 0 9 * * *
       responses:
         200:
           description: Feature created sucessfully
@@ -622,11 +563,12 @@ components:
           <li><b>ScheduleFeatureStrategy</b> - This strategy is used to enable the feature only on the specific time</li>
           <li><b>ScriptEngineFeatureStrategy</b> - This strategy is used to enable or disable the feature based on dynamic conditions</li>
         </ul>
+      type: string
       enum:
-        - BOOLEAN_FEATURE_STRATEGY
-        - JWT_CLAIM_FEATURE_STRATEGY
-        - HTTP_REQUEST_FEATURE_STRATEGY
-        - SCHEDULE_FEATURE_STRATEGY
+        - BooleanFeatureStrategy
+        - JWTClaimFeatureStrategy
+        - HTTPRequestFeatureStrategy
+        - ScheduleFeatureStrategy
       example: BooleanFeatureStrategy
     BooleanFeatureStrategy:
       type: object
@@ -637,11 +579,15 @@ components:
           type: boolean
           default: false
           example: false
+        strategy:
+          type: string
       required:
         - value
     JWTClaimFeatureStrategy:
       type: object
       properties:
+        strategy:
+          type: string
         value:
           type: object
           properties:
@@ -681,6 +627,8 @@ components:
     HTTPRequestFeatureStrategy:
       type: object
       properties:
+        strategy:
+          type: string
         header:
           type: object
           properties:
@@ -718,6 +666,8 @@ components:
     ScheduleFeatureStrategy:
       type: object
       properties:
+        strategy:
+          type: string
         cron:
           type: string
 
@@ -738,14 +688,14 @@ components:
           type: string
           description: Feature description
           maxLength: 255
-        strategy:
-          $ref: '#/components/schemas/FeatureStrategy'
         configuration:
           oneOf:
             - $ref: '#/components/schemas/BooleanFeatureStrategy'
             - $ref: '#/components/schemas/JWTClaimFeatureStrategy'
             - $ref: '#/components/schemas/HTTPRequestFeatureStrategy'
             - $ref: '#/components/schemas/ScheduleFeatureStrategy'
+          discriminator:
+            propertyName: strategy
         owners:
           type: array
           description: Owners who can manage the feature
