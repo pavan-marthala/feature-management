@@ -15,20 +15,6 @@ services:
     networks:
       - future_net
 
-  app:
-    build: .
-    container_name: future_management_app
-    environment:
-      db_host: postgres
-      db_user: postgres
-      db_password: future_management_db
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    networks:
-      - future_net
-
 volumes:
   postgres_data:
 
