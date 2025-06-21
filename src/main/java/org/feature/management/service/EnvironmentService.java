@@ -57,7 +57,8 @@ public class EnvironmentService {
     }
 
     public UUID createEnvironment(EnvironmentRequest env) {
-        log.info("Creating environment with name: {}", env.getName());
+        log.debug("Creating environment with name: {}", env.getName());
+        // Move the builder to mapper to keep the service clean
         EnvironmentEntity environmentEntity = EnvironmentEntity.builder().name(env.getName()).description(env.getDescription()).owners(new HashSet<>(env.getOwners())).build();
         return environmentRepo.save(environmentEntity).getId();
     }
@@ -84,11 +85,11 @@ public class EnvironmentService {
 
     public Environment getById(UUID id) {
         log.info("Getting environment with id: {}", id);
-        return environmentRepo.findById(id).map(environmentMapper::toDto).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + id));
+        return environmentRepo.findById(id).map(environmentMapper::toModel).orElseThrow(() -> new ResourceNotFoundException("Environment not found with id: " + id));
     }
 
     public Page<Environment> getAllEnvironments(Integer page, Integer size) {
         log.info("Getting all environments with page: {} and size: {}", page, size);
-        return environmentRepo.findAll(PageRequest.of(page, size)).map(environmentMapper::toDto);
+        return environmentRepo.findAll(PageRequest.of(page, size)).map(environmentMapper::toModel);
     }
 }

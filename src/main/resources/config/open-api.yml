@@ -36,6 +36,7 @@ paths:
     post:
       tags:
         - Environment
+      operationId: createEnvironment
       summary: Create environment
       description: |
         Create a new environment.
@@ -79,14 +80,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref:  '#/components/schemas/Pagination'
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Environment'
+                $ref: '#/components/schemas/EnvironmentResponse'
         401:
           description: Unauthorized - Authentication required
   /environments/{id}:
@@ -573,6 +567,16 @@ components:
         - required: [name]
         - required: [description]
         - required: [owners]
+    EnvironmentResponse:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Environment'
+
     Owner:
       type: string
       description: Owner id or name
@@ -604,6 +608,7 @@ components:
           minItems: 1
         etag:
           type: integer
+          format: int64
           description: Entity tag for optimistic concurrency control
           example: 1
 

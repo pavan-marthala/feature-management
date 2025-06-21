@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feature.management.models.Environment;
 import org.feature.management.models.EnvironmentRequest;
-import org.feature.management.models.EnvironmentsGet200Response;
+import org.feature.management.models.EnvironmentResponse;
 import org.feature.management.models.EnvironmentsIdPatchRequest;
 import org.feature.management.service.EnvironmentService;
 import org.springframework.data.domain.Page;
@@ -23,8 +23,10 @@ public class EnvironmentController {
 
     @PostMapping
     public ResponseEntity<UUID> createEnvironment(@RequestBody @Valid EnvironmentRequest env) {
-        log.info("inside controller Creating environment {}", env);
-        return ResponseEntity.status(HttpStatus.CREATED).body(environmentService.createEnvironment(env));
+        log.debug("Creating environment inside controller {}", env);
+        UUID environmentId = environmentService.createEnvironment(env);
+        log.info("environment {} created", env.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(environmentId);
     }
 
     @GetMapping("/{id}")
@@ -34,10 +36,10 @@ public class EnvironmentController {
     }
 
     @GetMapping
-    public EnvironmentsGet200Response getAllEnvironments(@RequestParam(value = "page",defaultValue = "0") Integer page,@RequestParam(value = "size",defaultValue = "40") Integer size) {
+    public EnvironmentResponse getAllEnvironments(@RequestParam(value = "page",defaultValue = "0") Integer page, @RequestParam(value = "size",defaultValue = "25") Integer size) {
         log.info("inside controller Getting all environments");
         Page<Environment> environmentsPage = environmentService.getAllEnvironments(page, size);
-        return EnvironmentsGet200Response.builder().totalPages(environmentsPage.getTotalPages()).totalItems((int)environmentsPage.getTotalElements()).page(page).size(size).items(environmentsPage.getContent()).build();
+        return EnvironmentResponse.builder().totalPages(environmentsPage.getTotalPages()).totalItems((int)environmentsPage.getTotalElements()).page(page).size(size).items(environmentsPage.getContent()).build();
     }
 
     @PostMapping("/{envId}/owners/{owner}")
