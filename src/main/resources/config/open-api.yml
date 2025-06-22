@@ -125,12 +125,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  $ref: '#/components/schemas/Environment/properties/name'
-                description:
-                  $ref: '#/components/schemas/Environment/properties/description'
+              $ref: '#/components/schemas/EnvironmentRequest'
+
       responses:
         204:
           description: Environment updated successfully
@@ -410,27 +406,27 @@ paths:
 components:
   schemas:
     ErrorDetails:
-        type: object
-        properties:
-          errorCode:
-            type: string
-            description: application specific error code
-            example: VE001
-          field:
-            type: string
-            description: field name which caused the error
-            example: name
-          value:
-            type: string
-            description: field value
-            example: de
-          message:
-            type: string
-            description: Reason for the error
-            example: name field require min 3 letters
-        required:
-          - field
-          - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: application specific error code
+          example: VE001
+        field:
+          type: string
+          description: field name which caused the error
+          example: name
+        value:
+          type: string
+          description: field value
+          example: de
+        message:
+          type: string
+          description: Reason for the error
+          example: name field require min 3 letters
+      required:
+        - field
+        - message
     Error:
       type: object
       properties:
@@ -508,6 +504,7 @@ components:
         - required: [name]
         - required: [description]
         - required: [owners]
+
     EnvironmentResponse:
       allOf:
         - $ref: '#/components/schemas/Pagination'

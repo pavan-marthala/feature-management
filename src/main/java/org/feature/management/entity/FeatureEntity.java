@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.feature.management.interfaces.ETaggableEntity;
 import org.feature.management.models.FeatureStrategy;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -24,7 +25,7 @@ import java.util.UUID;
 @Entity(name = "feature")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EntityListeners(AuditingEntityListener.class)
-public class FeatureEntity {
+public class FeatureEntity implements ETaggableEntity {
     @Id
     @GeneratedValue
     private UUID id;

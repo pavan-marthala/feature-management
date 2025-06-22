@@ -63,6 +63,16 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Error> handleEnvironmentException(AccessDeniedException ex, HttpServletRequest request) {
+        log.error("Access Denied Exception {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+
+        Error error = createBaseError(request, HttpStatus.UNAUTHORIZED);
+        error.setErrorMessage(ex.getMessage());
+        error.setDetailedErrors(null);
+
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Error> handleIOException(IOException ex, HttpServletRequest request) {

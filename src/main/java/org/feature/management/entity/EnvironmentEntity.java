@@ -2,6 +2,7 @@ package org.feature.management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.feature.management.interfaces.ETaggableEntity;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EnvironmentEntity {
+public class EnvironmentEntity implements ETaggableEntity {
 
     @Id
     @GeneratedValue
@@ -45,4 +46,6 @@ public class EnvironmentEntity {
     @LastModifiedDate
     @Column(nullable = false)
     private Instant modifiedAt;
+
+
 }
