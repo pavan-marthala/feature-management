@@ -10,7 +10,7 @@ import org.feature.management.entity.FeatureStrategyEntity;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BooleanFeatureStrategyEntity extends FeatureStrategyEntity {
+public class BooleanFeatureStrategyEntity implements FeatureStrategyEntity {
     private boolean value;
 
 }

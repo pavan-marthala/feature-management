@@ -7,13 +7,13 @@ import org.feature.management.entity.strategies.HTTPRequestFeatureStrategyEntity
 import org.feature.management.entity.strategies.JWTClaimFeatureStrategyEntity;
 import org.feature.management.entity.strategies.ScheduleFeatureStrategyEntity;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "strategy")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "strategy")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = BooleanFeatureStrategyEntity.class, name = "BOOLEAN_FEATURE_STRATEGY"),
-        @JsonSubTypes.Type(value = JWTClaimFeatureStrategyEntity.class, name = "JWT_CLAIM_FEATURE_STRATEGY"),
-        @JsonSubTypes.Type(value = HTTPRequestFeatureStrategyEntity.class, name = "HTTP_REQUEST_FEATURE_STRATEGY"),
-        @JsonSubTypes.Type(value = ScheduleFeatureStrategyEntity.class, name = "SCHEDULE_FEATURE_STRATEGY")
+        @JsonSubTypes.Type(value = BooleanFeatureStrategyEntity.class, name = "BooleanFeatureStrategy"),
+        @JsonSubTypes.Type(value = JWTClaimFeatureStrategyEntity.class, name = "JWTClaimFeatureStrategy"),
+        @JsonSubTypes.Type(value = HTTPRequestFeatureStrategyEntity.class, name = "HTTPRequestFeatureStrategy"),
+        @JsonSubTypes.Type(value = ScheduleFeatureStrategyEntity.class, name = "ScheduleFeatureStrategy")
 })
-public abstract class FeatureStrategyEntity {
+public interface FeatureStrategyEntity {
 
 }

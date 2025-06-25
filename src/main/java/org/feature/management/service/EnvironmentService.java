@@ -10,12 +10,11 @@ import org.feature.management.mapper.EnvironmentMapper;
 import org.feature.management.models.Environment;
 import org.feature.management.models.EnvironmentRequest;
 import org.feature.management.repository.EnvironmentRepository;
+import org.feature.management.utils.SortHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -26,7 +25,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class EnvironmentService {
     private final EnvironmentRepository environmentRepo;
-    private final EnvironmentMapper environmentMapper;
 
     public void assignOwnerToEnvironment(UUID envId, String owner) {
         log.debug("Assigning owner {} to environment {}", owner, envId);
@@ -60,7 +58,7 @@ public class EnvironmentService {
         return environmentRepo.save(EnvironmentMapper.INSTANCE.toEntity(env)).getId();
     }
 
-    public void updateEnvironment(UUID id,  EnvironmentRequest request) {
+    public void updateEnvironment(UUID id, EnvironmentRequest request) {
         log.debug("Updating environment with id: {} ", id);
         EnvironmentEntity env = getEnvironmentEntity(id);
         updateIfNotNull(env::setName, request.getName());
@@ -68,7 +66,7 @@ public class EnvironmentService {
         environmentRepo.save(env);
     }
 
-    private <T> void updateIfNotNull(Consumer<T> setter,T value){
+    private <T> void updateIfNotNull(Consumer<T> setter, T value) {
         Optional.ofNullable(value).ifPresent(setter);
     }
 
@@ -80,28 +78,12 @@ public class EnvironmentService {
 
     public Environment getById(UUID id) {
         log.debug("Getting environment with id: {}", id);
-        return Optional.ofNullable(getEnvironmentEntity(id)).map(environmentMapper::toModel).orElse(null);
+        return Optional.ofNullable(getEnvironmentEntity(id)).map(EnvironmentMapper.INSTANCE::toModel).orElse(null);
     }
 
-    public Page<Environment> getAllEnvironments(Integer page, Integer size, List<String> sortParams) {
+    public Page<Environment> getAllEnvironments(Integer page, Integer size, String sort) {
         log.debug("Getting all environments with page: {} and size: {}", page, size);
-        Sort sort = Sort.unsorted();
-
-        if (sortParams != null && !sortParams.isEmpty()) {
-            List<Sort.Order> orders = sortParams.stream()
-                    .map(param -> {
-                        String[] parts = param.split(",");
-                        if (parts.length == 2) {
-                            return new Sort.Order(Sort.Direction.fromString(parts[1]), parts[0]);
-                        } else {
-                            return new Sort.Order(Sort.Direction.ASC, parts[0]);
-                        }
-                    })
-                    .toList();
-
-            sort = Sort.by(orders);
-        }
-        return environmentRepo.findAll(PageRequest.of(page, size,sort)).map(environmentMapper::toModel);
+        return environmentRepo.findAll(PageRequest.of(page, size, SortHelper.buildSort(sort))).map(EnvironmentMapper.INSTANCE::toModel);
     }
 
     private EnvironmentEntity getEnvironmentEntity(UUID envId) {

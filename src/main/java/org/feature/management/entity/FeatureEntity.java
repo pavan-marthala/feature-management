@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.feature.management.interfaces.ETaggableEntity;
-import org.feature.management.models.FeatureStrategy;
+import org.feature.management.models.FeatureConfiguration;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +15,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,9 +37,9 @@ public class FeatureEntity implements ETaggableEntity {
     @Column(name = "description")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "strategy")
-    private FeatureStrategy strategy;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "strategy")
+//    private FeatureStrategy strategy;
 
     private boolean enabled;
 
@@ -48,11 +49,11 @@ public class FeatureEntity implements ETaggableEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private Set<String> owners;
+    private Set<String> owners = new HashSet<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private FeatureStrategyEntity configuration;
+    private FeatureConfiguration configuration;
 
     @Version
     @Column(nullable = false)

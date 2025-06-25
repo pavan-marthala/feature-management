@@ -28,3 +28,14 @@ logging:
     com.fasterxml.jackson: DEBUG
     org.hibernate.type.descriptor.converter: DEBUG
     org.hibernate.SQL: DEBUG
+
+feature:
+  strategies:
+    - name: BooleanFeatureStrategy
+      description: This strategy is used to work based on boolean values true or false.
+    - name: JWTClaimFeatureStrategy
+      description: This strategy is used to work based on JWT claim key and value.
+    - name: HTTPRequestFeatureStrategy
+      description: This strategy is used to work based on HTTP request. That could be a URL path, header or request body.
+    - name: ScheduleFeatureStrategy
+      description: This strategy is used to enable or disable the feature based on dynamic conditions.

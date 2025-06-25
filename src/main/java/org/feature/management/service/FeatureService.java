@@ -1,19 +1,25 @@
 package org.feature.management.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feature.management.config.FeatureStrategyConfig;
 import org.feature.management.entity.FeatureEntity;
-import org.feature.management.exception.FeatureException;
+import org.feature.management.exception.AccessDeniedException;
+import org.feature.management.exception.EnvironmentException;
 import org.feature.management.exception.ResourceNotFoundException;
+import org.feature.management.mapper.FeatureMapper;
+import org.feature.management.models.Feature;
+import org.feature.management.models.FeatureStrategyResponseInner;
 import org.feature.management.repository.FeatureRepository;
-import org.springframework.data.domain.*;
+import org.feature.management.utils.SortHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -22,80 +28,67 @@ import java.util.UUID;
 public class FeatureService {
 
     private final FeatureRepository featureRepo;
-    private final ObjectMapper mapper;
+    private final FeatureStrategyConfig featureStrategyConfig;
 
-    public FeatureEntity assignOwnerToFeature(UUID featureId, String owner) {
-        log.info("Assigning owner {} to feature {}", owner, featureId);
-        FeatureEntity feature = featureRepo.findById(featureId).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + featureId));
-        var owners = Optional.ofNullable(feature.getOwners()).orElse(new HashSet<>());
-        owners.add(owner);
-        feature.setOwners(owners);
-        log.info("Owner {} assigned to feature {}", owner, featureId);
-        return featureRepo.save(feature);
+    public void assignOwnerToFeature(UUID featureId, String owner) {
+        log.debug("Assigning owner {} to feature {}", owner, featureId);
+        FeatureEntity feature = getFeature(featureId);
+        feature.getOwners().add(owner);
+        log.debug("Owner {} assigned to feature {}", owner, featureId);
+        featureRepo.save(feature);
     }
 
-    public FeatureEntity removeOwnerFromFeature(UUID featureId, String owner) {
-        log.info("Removing owner {} from feature {}", owner, featureId);
-        FeatureEntity feature = featureRepo.findById(featureId).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + featureId));
-        if (feature.getOwners() != null && feature.getOwners().contains(owner)) {
-            feature.getOwners().remove(owner);
-        } else {
-            throw new ResourceNotFoundException("Owner not found in environment: " + featureId);
-        }
-        log.info("Owner {} removed from feature {}", owner, featureId);
-        return featureRepo.save(feature);
+
+    public void removeOwnerFromFeature(UUID featureId, String owner) {
+        log.debug("Removing owner {} from feature {}", owner, featureId);
+        FeatureEntity feature = getFeature(featureId);
+        Optional.ofNullable(feature.getOwners())
+                .filter(owners -> owners.contains(owner))
+                .map(owners -> removeOwner(owner, owners))
+                .orElseThrow(() -> new AccessDeniedException("Access denied. Only owner of the feature can remove the owner."));
+
+        log.debug("Owner {} removed from feature {}", owner, featureId);
+        featureRepo.save(feature);
     }
 
-    public Page<FeatureEntity> getAllFeatures(Integer page, Integer size) {
-        log.info("Fetching features with pagination, page: {}, size: {}", page, size);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<FeatureEntity> featuresPage = featureRepo.findAll(pageable);
+    private boolean removeOwner(String ownerId, Set<String> owners) {
+        Optional.of(owners).filter(o -> o.size() > 1).orElseThrow(() -> new EnvironmentException("Cannot remove the last owner from environment. At least one owner is required."));
+        owners.remove(ownerId);
+        return true;
+    }
 
-        List<FeatureEntity> mappedList = featuresPage
-                .stream()
-                // .map(feature -> mapper.convertValue(feature, org.feature.management.models.Feature.class))
-                .toList();
-
-        return new PageImpl<>(mappedList, pageable, featuresPage.getTotalElements());
+    public Page<Feature> getAllFeatures(Integer page, Integer size, String sort) {
+        log.debug("Fetching features with pagination, page: {}, size: {}", page, size);
+        return featureRepo.findAll(PageRequest.of(page, size, SortHelper.buildSort(sort))).map(FeatureMapper.INSTANCE::toModel);
     }
 
 
     @Transactional
-    public UUID createFeature(FeatureEntity featureRequest) {
-        log.info("Creating feature with request: {}", featureRequest);
-
-        if (featureRequest.getStrategy() == null) {
-            log.error("Strategy is NULL in the request! This is the root cause of the issue.");
-            throw new FeatureException("Strategy cannot be null");
-        }
-
-        log.info("Strategy received: {}", featureRequest.getStrategy());
-
-        FeatureEntity feature = FeatureEntity.builder()
-                .name(featureRequest.getName())
-                .description(featureRequest.getDescription())
-                .enabled(featureRequest.isEnabled())
-                .strategy(featureRequest.getStrategy())
-                .owners(featureRequest.getOwners())
-                .configuration(featureRequest.getConfiguration())
-//                .environment(featureRequest.getEnvironment())
-                .build();
-
-        FeatureEntity savedFeature = featureRepo.save(feature);
-        log.info("Feature created with ID: {}", savedFeature.getId());
-
+    public UUID createFeature(Feature featureRequest) {
+        log.debug("Creating feature with request: {}", featureRequest);
+        FeatureEntity savedFeature = featureRepo.save(FeatureMapper.INSTANCE.toEntity(featureRequest));
+        log.debug("Feature created with ID: {}", savedFeature.getId());
         return savedFeature.getId();
     }
 
 
-    public FeatureEntity getById(UUID id) {
-        log.info("Fetching feature by id: {}", id);
-        return featureRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + id));
+    public Feature getById(UUID id) {
+        log.debug("Fetching feature by id: {}", id);
+        return Optional.ofNullable(getFeature(id)).map(FeatureMapper.INSTANCE::toModel).orElse(null);
     }
 
-    public void deleteById(UUID id, Integer ifMatch) {
-        log.info("Deleting feature by id: {}, ifMatch: {}", id, ifMatch);
-        FeatureEntity feature = featureRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + id));
-        featureRepo.deleteById(id);
+    public void deleteById(UUID id) {
+        log.debug("Deleting feature by id: {}", id);
+        FeatureEntity feature = getFeature(id);
+        featureRepo.delete(feature);
+    }
+
+    public List<FeatureStrategyResponseInner> getAllFeatureStrategies() {
+        log.debug("Fetching all feature strategies");
+        return featureStrategyConfig.getStrategies();
+    }
+
+    private FeatureEntity getFeature(UUID featureId) {
+        return featureRepo.findById(featureId).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + featureId));
     }
 }

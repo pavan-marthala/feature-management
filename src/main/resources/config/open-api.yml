@@ -248,14 +248,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/Pagination'
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Feature'
+                $ref: '#/components/schemas/FeatureResponse'
         401:
           description: Unauthorized - Authentication required
   /features/strategies:
@@ -270,15 +263,8 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      $ref: '#/components/schemas/FeatureStrategy'
-                    description:
-                      type: string
-                      description: Strategy description
+                $ref: '#/components/schemas/FeatureStrategyResponse'
+
         401:
           description: Unauthorized - Authentication required
   /features/{id}:
@@ -321,7 +307,7 @@ paths:
           application/json:
             schema:
               oneOf:
-                -  $ref: '#/components/schemas/BooleanFeatureStrategy'
+                - $ref: '#/components/schemas/BooleanFeatureStrategy'
             examples:
               BooleanFeature:
                 summary: Feature toggle with boolean
@@ -501,9 +487,9 @@ components:
         owners:
           $ref: '#/components/schemas/Environment/properties/owners'
       anyOf:
-        - required: [name]
-        - required: [description]
-        - required: [owners]
+        - required: [ name ]
+        - required: [ description ]
+        - required: [ owners ]
 
     EnvironmentResponse:
       allOf:
@@ -514,6 +500,25 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Environment'
+    FeatureResponse:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Feature'
+    FeatureStrategyResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            $ref: '#/components/schemas/FeatureStrategy'
+          description:
+            type: string
+            description: Strategy description
 
     Owner:
       type: string
@@ -585,40 +590,37 @@ components:
       properties:
         strategy:
           type: string
-        value:
-          type: object
-          properties:
-            claims:
-              type: array
-              items:
-                oneOf:
-                  - type: object
-                    properties:
-                      scopes:
-                        type: array
-                        items:
-                          type: string
-                    required:
-                      - scopes
-                  - type: object
-                    properties:
-                      roles:
-                        type: array
-                        items:
-                          type: string
-                    required:
-                      - roles
-                  - type: array
+        claims:
+          type: array
+          items:
+            oneOf:
+              - type: object
+                properties:
+                  scopes:
+                    type: array
                     items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        value:
-                          type: string
-                      required:
-                        - name
-                        - value
+                      type: string
+                required:
+                  - scopes
+              - type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - roles
+              - type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                    - name
+                    - value
           required:
             - claims
     HTTPRequestFeatureStrategy:
@@ -657,9 +659,9 @@ components:
             - name
             - value
       anyOf:
-        - required: [header]
-        - required: [requestBody]
-        - required: [query]
+        - required: [ header ]
+        - required: [ requestBody ]
+        - required: [ query ]
     ScheduleFeatureStrategy:
       type: object
       properties:
@@ -758,4 +760,4 @@ components:
       scheme: bearer
       bearerFormat: JWT
 security:
-  - BearerAuth: []
+  - BearerAuth: [ ]

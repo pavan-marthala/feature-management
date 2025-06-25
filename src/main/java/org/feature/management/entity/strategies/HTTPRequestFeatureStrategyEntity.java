@@ -1,17 +1,17 @@
 package org.feature.management.entity.strategies;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.feature.management.entity.FeatureStrategyEntity;
-
 
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class HTTPRequestFeatureStrategyEntity extends FeatureStrategyEntity {
+public class HTTPRequestFeatureStrategyEntity implements FeatureStrategyEntity {
 
     private HTTPHeader header;
 

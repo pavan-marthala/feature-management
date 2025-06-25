@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.feature.management.interfaces.ETaggableEntity;
 import org.feature.management.record.ETagRoute;
 import org.feature.management.repository.EnvironmentRepository;
-import org.feature.management.repository.FeatureRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,10 +19,10 @@ import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
-public class ETagValidationFilter extends OncePerRequestFilter {
+public class EnvironmentETagValidationFilter extends OncePerRequestFilter {
 
     private final EnvironmentRepository environmentRepo;
-    private final FeatureRepository featureRepo;
+
 
     private final List<ETagRoute> routes = new ArrayList<>();
 
@@ -41,17 +40,6 @@ public class ETagValidationFilter extends OncePerRequestFilter {
                 environmentRepo::findById
         ));
 
-        routes.add(new ETagRoute(
-                Pattern.compile("^/features/([0-9a-fA-F\\-]+)$"),
-                matcher -> UUID.fromString(matcher.group(1)),
-                featureRepo::findById
-        ));
-
-        routes.add(new ETagRoute(
-                Pattern.compile("^/features/([0-9a-fA-F\\-]+)/owners/[^/]+$"),
-                matcher -> UUID.fromString(matcher.group(1)),
-                featureRepo::findById
-        ));
     }
 
     @Override
@@ -70,6 +58,7 @@ public class ETagValidationFilter extends OncePerRequestFilter {
             response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, "Missing If-Match header");
             return;
         }
+
 
         for (ETagRoute route : routes) {
             Matcher matcher = route.pattern().matcher(path);

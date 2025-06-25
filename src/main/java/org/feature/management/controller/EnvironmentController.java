@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -37,14 +36,14 @@ public class EnvironmentController {
     }
 
     @GetMapping
-    public EnvironmentResponse getAllEnvironments(@RequestParam(value = "page",defaultValue = "0") Integer page, @RequestParam(value = "size",defaultValue = "25") Integer size, @RequestParam(value = "sort", required = false) List<String> sortParams) {
+    public EnvironmentResponse getAllEnvironments(@RequestParam(value = "page", defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "25") Integer size, @RequestParam(value = "sort", required = false) String sort) {
         log.debug("Getting all environments inside controller");
-        Page<Environment> environmentsPage = environmentService.getAllEnvironments(page, size,sortParams);
-        return EnvironmentResponse.builder().totalPages(environmentsPage.getTotalPages()).totalItems((int)environmentsPage.getTotalElements()).page(page).size(size).items(environmentsPage.getContent()).build();
+        Page<Environment> environmentsPage = environmentService.getAllEnvironments(page, size, sort);
+        return EnvironmentResponse.builder().totalPages(environmentsPage.getTotalPages()).totalItems((int) environmentsPage.getTotalElements()).page(page).size(size).items(environmentsPage.getContent()).build();
     }
 
     @PostMapping("/{envId}/owners/{owner}")
-    public ResponseEntity<?>  addOwnerToEnvironment(@PathVariable UUID envId, @PathVariable String  owner) {
+    public ResponseEntity<?> addOwnerToEnvironment(@PathVariable UUID envId, @PathVariable String owner) {
         log.debug("inside controller Adding owner {} to environment {}", owner, envId);
         environmentService.assignOwnerToEnvironment(envId, owner);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

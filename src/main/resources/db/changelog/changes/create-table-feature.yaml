@@ -18,18 +18,18 @@ databaseChangeLog:
               - column:
                   name: description
                   type: VARCHAR(255)
-              - column:
-                  name: strategy
-                  type: VARCHAR(255)
+              #              - column:
+              #                  name: strategy
+              #                  type: VARCHAR(255)
               - column:
                   name: enabled
                   type: BOOLEAN
               - column:
                   name: owners
                   type: JSONB
-#              - column:
-#                  name: environment_id
-#                  type: UUID
+              #              - column:
+              #                  name: environment_id
+              #                  type: UUID
               - column:
                   name: configuration
                   type: JSONB
