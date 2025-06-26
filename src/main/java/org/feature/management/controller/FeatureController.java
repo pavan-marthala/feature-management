@@ -3,10 +3,10 @@ package org.feature.management.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feature.management.interfaces.service.FeatureServiceInterface;
 import org.feature.management.models.Feature;
 import org.feature.management.models.FeatureResponse;
 import org.feature.management.models.FeatureStrategyResponseInner;
-import org.feature.management.service.FeatureService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping("/features")
 @RequiredArgsConstructor
 public class FeatureController {
-    private final FeatureService featureService;
+    private final FeatureServiceInterface featureService;
 
     @PostMapping
     public ResponseEntity<UUID> createFeature(@Valid @RequestBody Feature featureRequest) {
@@ -49,8 +49,13 @@ public class FeatureController {
         return featureService.getById(id);
     }
 
+    @GetMapping("/getByName/{name}")
+    public Feature getByFeatureByName(@PathVariable("name") String name) {
+        log.debug("Getting feature by name: {}", name);
+        return featureService.getFeatureByName(name);
+    }
 
-    @PutMapping("/{featureId}/owners/{owner}")
+    @PostMapping("/{featureId}/owners/{owner}")
     public ResponseEntity<?> addOwnerToFeature(@PathVariable UUID featureId, @PathVariable String owner) {
         log.debug("Adding owner {} to feature {}", owner, featureId);
         featureService.assignOwnerToFeature(featureId, owner);
@@ -66,7 +71,7 @@ public class FeatureController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> featuresIdDelete(@PathVariable("id") UUID id) {
+    public ResponseEntity<Void> deleteFeatureById(@PathVariable("id") UUID id) {
         log.debug("Deleting feature by ID: {}", id);
         featureService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -6,7 +6,9 @@ import org.feature.management.config.FeatureStrategyConfig;
 import org.feature.management.entity.FeatureEntity;
 import org.feature.management.exception.AccessDeniedException;
 import org.feature.management.exception.EnvironmentException;
+import org.feature.management.exception.FeatureException;
 import org.feature.management.exception.ResourceNotFoundException;
+import org.feature.management.interfaces.service.FeatureServiceInterface;
 import org.feature.management.mapper.FeatureMapper;
 import org.feature.management.models.Feature;
 import org.feature.management.models.FeatureStrategyResponseInner;
@@ -25,11 +27,12 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FeatureService {
+public class FeatureServiceImplementation implements FeatureServiceInterface {
 
     private final FeatureRepository featureRepo;
     private final FeatureStrategyConfig featureStrategyConfig;
 
+    @Override
     public void assignOwnerToFeature(UUID featureId, String owner) {
         log.debug("Assigning owner {} to feature {}", owner, featureId);
         FeatureEntity feature = getFeature(featureId);
@@ -38,7 +41,7 @@ public class FeatureService {
         featureRepo.save(feature);
     }
 
-
+    @Override
     public void removeOwnerFromFeature(UUID featureId, String owner) {
         log.debug("Removing owner {} from feature {}", owner, featureId);
         FeatureEntity feature = getFeature(featureId);
@@ -57,35 +60,48 @@ public class FeatureService {
         return true;
     }
 
+    @Override
     public Page<Feature> getAllFeatures(Integer page, Integer size, String sort) {
         log.debug("Fetching features with pagination, page: {}, size: {}", page, size);
         return featureRepo.findAll(PageRequest.of(page, size, SortHelper.buildSort(sort))).map(FeatureMapper.INSTANCE::toModel);
     }
 
-
+    @Override
     @Transactional
     public UUID createFeature(Feature featureRequest) {
+        Optional.ofNullable(featureRequest.getName()).filter(featureRepo::existsByName)
+                .ifPresent(name -> {
+                    throw new FeatureException("Feature with name " + name + " already exists");
+                });
         log.debug("Creating feature with request: {}", featureRequest);
         FeatureEntity savedFeature = featureRepo.save(FeatureMapper.INSTANCE.toEntity(featureRequest));
         log.debug("Feature created with ID: {}", savedFeature.getId());
         return savedFeature.getId();
     }
 
-
+    @Override
     public Feature getById(UUID id) {
         log.debug("Fetching feature by id: {}", id);
         return Optional.ofNullable(getFeature(id)).map(FeatureMapper.INSTANCE::toModel).orElse(null);
     }
 
+    @Override
     public void deleteById(UUID id) {
         log.debug("Deleting feature by id: {}", id);
         FeatureEntity feature = getFeature(id);
         featureRepo.delete(feature);
     }
 
+    @Override
     public List<FeatureStrategyResponseInner> getAllFeatureStrategies() {
         log.debug("Fetching all feature strategies");
         return featureStrategyConfig.getStrategies();
+    }
+
+    @Override
+    public Feature getFeatureByName(String name) {
+        log.debug("Fetching feature by name: {}", name);
+        return featureRepo.getByName(name).map(FeatureMapper.INSTANCE::toModel).orElse(null);
     }
 
     private FeatureEntity getFeature(UUID featureId) {

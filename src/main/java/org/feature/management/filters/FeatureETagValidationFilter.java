@@ -22,8 +22,9 @@ import java.util.regex.Pattern;
 public class FeatureETagValidationFilter extends OncePerRequestFilter {
 
     private final FeatureRepository featureRepo;
-
     private final List<ETagRoute> routes = new ArrayList<>();
+    private static final Set<String> ETAG_METHODS = Set.of("PATCH", "DELETE");
+
 
     @PostConstruct
     public void init() {
@@ -45,9 +46,7 @@ public class FeatureETagValidationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        String method = request.getMethod();
-
-        if (!(method.equals("PATCH") || method.equals("DELETE"))) {
+        if (!ETAG_METHODS.contains(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -58,33 +57,44 @@ public class FeatureETagValidationFilter extends OncePerRequestFilter {
             return;
         }
 
-        for (ETagRoute route : routes) {
-            Matcher matcher = route.pattern().matcher(path);
-            if (matcher.matches()) {
-                try {
-                    UUID id = route.idExtractor().apply(matcher);
-                    Long ifMatch = Long.parseLong(ifMatchHeader);
+        Optional<ETagRoute> matchingRoute = routes.stream().filter(route -> route.pattern().matcher(path).matches()).findFirst();
 
-                    Optional<? extends ETaggableEntity> entityOpt = route.entityFetcher().apply(id);
-                    if (entityOpt.isEmpty()) {
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Resource not found with id: " + id);
-                        return;
-                    }
-
-                    Long actualEtag = entityOpt.get().getEtag();
-                    if (!Objects.equals(actualEtag, ifMatch)) {
-                        response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, "ETag does not match");
-                        return;
-                    }
-
-                } catch (IllegalArgumentException e) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID or If-Match format");
-                    return;
-                }
-                break;
+        if (matchingRoute.isPresent()) {
+            if (!validateETag(matchingRoute.get(), path, ifMatchHeader, response)) {
+                return;
             }
         }
-
         filterChain.doFilter(request, response);
+    }
+
+    private boolean validateETag(ETagRoute route, String path, String ifMatchHeader, HttpServletResponse response) throws IOException {
+        try {
+            Matcher matcher = route.pattern().matcher(path);
+            if (!matcher.matches()) {
+                return true;
+            }
+
+            UUID id = route.idExtractor().apply(matcher);
+            Long ifMatch = Long.parseLong(ifMatchHeader);
+
+            Optional<? extends ETaggableEntity> entityOpt = route.entityFetcher().apply(id);
+            if (entityOpt.isEmpty()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Resource not found with id: " + id);
+                return false;
+            }
+
+            Long actualEtag = entityOpt.get().getEtag();
+            if (!Objects.equals(actualEtag, ifMatch)) {
+                response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, "ETag does not match");
+                return false;
+            }
+
+            return true;
+
+        } catch (IllegalArgumentException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID or If-Match format");
+            return false;
+        }
+
     }
 }

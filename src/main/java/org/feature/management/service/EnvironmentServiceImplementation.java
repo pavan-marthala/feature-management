@@ -6,6 +6,7 @@ import org.feature.management.entity.EnvironmentEntity;
 import org.feature.management.exception.AccessDeniedException;
 import org.feature.management.exception.EnvironmentException;
 import org.feature.management.exception.ResourceNotFoundException;
+import org.feature.management.interfaces.service.EnvironmentServiceInterface;
 import org.feature.management.mapper.EnvironmentMapper;
 import org.feature.management.models.Environment;
 import org.feature.management.models.EnvironmentRequest;
@@ -23,9 +24,10 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class EnvironmentService {
+public class EnvironmentServiceImplementation implements EnvironmentServiceInterface {
     private final EnvironmentRepository environmentRepo;
 
+    @Override
     public void assignOwnerToEnvironment(UUID envId, String owner) {
         log.debug("Assigning owner {} to environment {}", owner, envId);
         EnvironmentEntity env = getEnvironmentEntity(envId);
@@ -35,6 +37,7 @@ public class EnvironmentService {
     }
 
 
+    @Override
     public void removeOwnerFromEnvironment(UUID envId, String ownerId) {
         log.debug("Removing owner {} from environment {}", ownerId, envId);
         EnvironmentEntity env = getEnvironmentEntity(envId);
@@ -53,11 +56,13 @@ public class EnvironmentService {
         return true;
     }
 
+    @Override
     public UUID createEnvironment(EnvironmentRequest env) {
         log.debug("Creating environment with name: {}", env.getName());
         return environmentRepo.save(EnvironmentMapper.INSTANCE.toEntity(env)).getId();
     }
 
+    @Override
     public void updateEnvironment(UUID id, EnvironmentRequest request) {
         log.debug("Updating environment with id: {} ", id);
         EnvironmentEntity env = getEnvironmentEntity(id);
@@ -70,17 +75,20 @@ public class EnvironmentService {
         Optional.ofNullable(value).ifPresent(setter);
     }
 
+    @Override
     public void deleteById(UUID id) {
         log.debug("Deleting environment with id: {} ", id);
         EnvironmentEntity env = getEnvironmentEntity(id);
         environmentRepo.delete(env);
     }
 
+    @Override
     public Environment getById(UUID id) {
         log.debug("Getting environment with id: {}", id);
         return Optional.ofNullable(getEnvironmentEntity(id)).map(EnvironmentMapper.INSTANCE::toModel).orElse(null);
     }
 
+    @Override
     public Page<Environment> getAllEnvironments(Integer page, Integer size, String sort) {
         log.debug("Getting all environments with page: {} and size: {}", page, size);
         return environmentRepo.findAll(PageRequest.of(page, size, SortHelper.buildSort(sort))).map(EnvironmentMapper.INSTANCE::toModel);

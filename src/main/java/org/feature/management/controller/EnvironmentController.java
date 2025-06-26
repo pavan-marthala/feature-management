@@ -3,10 +3,10 @@ package org.feature.management.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feature.management.interfaces.service.EnvironmentServiceInterface;
 import org.feature.management.models.Environment;
 import org.feature.management.models.EnvironmentRequest;
 import org.feature.management.models.EnvironmentResponse;
-import org.feature.management.service.EnvironmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequestMapping("/environments")
 @RequiredArgsConstructor
 public class EnvironmentController {
-    private final EnvironmentService environmentService;
+    private final EnvironmentServiceInterface environmentService;
 
     @PostMapping
     public ResponseEntity<UUID> createEnvironment(@RequestBody @Valid EnvironmentRequest env) {
