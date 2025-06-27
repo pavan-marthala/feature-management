@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feature.management.interfaces.service.FeatureServiceInterface;
 import org.feature.management.models.Feature;
+import org.feature.management.models.FeatureConfiguration;
 import org.feature.management.models.FeatureResponse;
 import org.feature.management.models.FeatureStrategyResponseInner;
 import org.springframework.data.domain.Page;
@@ -66,6 +67,13 @@ public class FeatureController {
     public ResponseEntity<?> removeOwnerFromFeature(@PathVariable UUID featureId, @PathVariable String owner) {
         log.debug("Removing owner {} from feature {}", owner, featureId);
         featureService.removeOwnerFromFeature(featureId, owner);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateFeature(@PathVariable UUID id, @Valid @RequestBody FeatureConfiguration configuration) {
+        log.debug("Updating feature by ID: {}", id);
+        featureService.updateFeature(id, configuration);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

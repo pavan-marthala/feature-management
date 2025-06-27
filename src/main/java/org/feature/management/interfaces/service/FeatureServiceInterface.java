@@ -1,6 +1,7 @@
 package org.feature.management.interfaces.service;
 
 import org.feature.management.models.Feature;
+import org.feature.management.models.FeatureConfiguration;
 import org.feature.management.models.FeatureStrategyResponseInner;
 import org.springframework.data.domain.Page;
 
@@ -24,5 +25,7 @@ public interface FeatureServiceInterface {
     List<FeatureStrategyResponseInner> getAllFeatureStrategies();
 
     Feature getFeatureByName(String name);
+
+    void updateFeature(UUID id, FeatureConfiguration configuration);
 
 }

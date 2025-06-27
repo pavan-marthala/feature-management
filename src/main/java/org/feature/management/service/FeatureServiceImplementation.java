@@ -11,6 +11,7 @@ import org.feature.management.exception.ResourceNotFoundException;
 import org.feature.management.interfaces.service.FeatureServiceInterface;
 import org.feature.management.mapper.FeatureMapper;
 import org.feature.management.models.Feature;
+import org.feature.management.models.FeatureConfiguration;
 import org.feature.management.models.FeatureStrategyResponseInner;
 import org.feature.management.repository.FeatureRepository;
 import org.feature.management.utils.SortHelper;
@@ -102,6 +103,14 @@ public class FeatureServiceImplementation implements FeatureServiceInterface {
     public Feature getFeatureByName(String name) {
         log.debug("Fetching feature by name: {}", name);
         return featureRepo.getByName(name).map(FeatureMapper.INSTANCE::toModel).orElse(null);
+    }
+
+    @Override
+    public void updateFeature(UUID id, FeatureConfiguration configuration) {
+        log.debug("Updating feature configuration with id: {}", id);
+        FeatureEntity feature = getFeature(id);
+        feature.setConfiguration(configuration);
+        featureRepo.save(feature);
     }
 
     private FeatureEntity getFeature(UUID featureId) {
