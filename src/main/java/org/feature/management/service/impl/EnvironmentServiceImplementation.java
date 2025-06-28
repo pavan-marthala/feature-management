@@ -1,4 +1,4 @@
-package org.feature.management.service;
+package org.feature.management.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,11 +6,11 @@ import org.feature.management.entity.EnvironmentEntity;
 import org.feature.management.exception.AccessDeniedException;
 import org.feature.management.exception.EnvironmentException;
 import org.feature.management.exception.ResourceNotFoundException;
-import org.feature.management.interfaces.service.EnvironmentServiceInterface;
 import org.feature.management.mapper.EnvironmentMapper;
 import org.feature.management.models.Environment;
 import org.feature.management.models.EnvironmentRequest;
 import org.feature.management.repository.EnvironmentRepository;
+import org.feature.management.service.EnvironmentServiceInterface;
 import org.feature.management.utils.SortHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

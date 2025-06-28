@@ -3,11 +3,8 @@ package org.feature.management.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.feature.management.interfaces.service.FeatureServiceInterface;
-import org.feature.management.models.Feature;
-import org.feature.management.models.FeatureConfiguration;
-import org.feature.management.models.FeatureResponse;
-import org.feature.management.models.FeatureStrategyResponseInner;
+import org.feature.management.models.*;
+import org.feature.management.service.FeatureServiceInterface;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,15 +42,9 @@ public class FeatureController {
     }
 
     @GetMapping("/{id}")
-    public Feature getByFeatureId(@PathVariable("id") UUID id) {
+    public Feature getByFeatureId(@PathVariable("id") String id, @RequestParam(value = "idType", defaultValue = "ID") IdType idType) {
         log.debug("Getting feature by ID: {}", id);
-        return featureService.getById(id);
-    }
-
-    @GetMapping("/getByName/{name}")
-    public Feature getByFeatureByName(@PathVariable("name") String name) {
-        log.debug("Getting feature by name: {}", name);
-        return featureService.getFeatureByName(name);
+        return featureService.getById(id, idType);
     }
 
     @PostMapping("/{featureId}/owners/{owner}")

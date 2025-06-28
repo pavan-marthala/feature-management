@@ -1,4 +1,4 @@
-package org.feature.management.interfaces.service;
+package org.feature.management.service;
 
 import org.feature.management.models.Environment;
 import org.feature.management.models.EnvironmentRequest;

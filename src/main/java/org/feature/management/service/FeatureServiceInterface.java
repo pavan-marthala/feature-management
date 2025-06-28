@@ -1,8 +1,9 @@
-package org.feature.management.interfaces.service;
+package org.feature.management.service;
 
 import org.feature.management.models.Feature;
 import org.feature.management.models.FeatureConfiguration;
 import org.feature.management.models.FeatureStrategyResponseInner;
+import org.feature.management.models.IdType;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public interface FeatureServiceInterface {
 
     UUID createFeature(Feature featureRequest);
 
-    Feature getById(UUID id);
+    Feature getById(String id, IdType idType);
 
     void deleteById(UUID id);
 

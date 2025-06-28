@@ -1,4 +1,4 @@
-package org.feature.management.service;
+package org.feature.management.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,12 +8,13 @@ import org.feature.management.exception.AccessDeniedException;
 import org.feature.management.exception.EnvironmentException;
 import org.feature.management.exception.FeatureException;
 import org.feature.management.exception.ResourceNotFoundException;
-import org.feature.management.interfaces.service.FeatureServiceInterface;
 import org.feature.management.mapper.FeatureMapper;
 import org.feature.management.models.Feature;
 import org.feature.management.models.FeatureConfiguration;
 import org.feature.management.models.FeatureStrategyResponseInner;
+import org.feature.management.models.IdType;
 import org.feature.management.repository.FeatureRepository;
+import org.feature.management.service.FeatureServiceInterface;
 import org.feature.management.utils.SortHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -81,9 +82,9 @@ public class FeatureServiceImplementation implements FeatureServiceInterface {
     }
 
     @Override
-    public Feature getById(UUID id) {
+    public Feature getById(String id, IdType idType) {
         log.debug("Fetching feature by id: {}", id);
-        return Optional.ofNullable(getFeature(id)).map(FeatureMapper.INSTANCE::toModel).orElse(null);
+        return Optional.ofNullable(idType == IdType.ID ? getFeature(UUID.fromString(id)) : featureRepo.getByName(id).orElseThrow(() -> new ResourceNotFoundException("Feature not found with id: " + id))).map(FeatureMapper.INSTANCE::toModel).orElse(null);
     }
 
     @Override

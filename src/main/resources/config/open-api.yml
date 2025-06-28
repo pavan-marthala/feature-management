@@ -276,6 +276,7 @@ paths:
         Returns tje featire details.
       parameters:
         - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/IdType'
       responses:
         200:
           description: Feature details
@@ -391,6 +392,12 @@ paths:
 
 components:
   schemas:
+    IdType:
+      type: string
+      default: NAME
+      enum:
+        - ID
+        - NAME
     ErrorDetails:
       type: object
       properties:
@@ -721,6 +728,13 @@ components:
       schema:
         type: string
         format: uuid
+    IdType:
+      name: idType
+      in: query
+      required: true
+      description: Unique identifier
+      schema:
+        $ref: "#/components/schemas/IdType"
     OwnerId:
       name: ownerId
       in: path
