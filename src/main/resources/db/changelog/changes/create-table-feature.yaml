@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: feature-1
+      author: pavan
+      changes:
+        - createTable:
+            tableName: feature
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              #              - column:
+              #                  name: strategy
+              #                  type: VARCHAR(255)
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+              - column:
+                  name: owners
+                  type: JSONB
+              #              - column:
+              #                  name: environment_id
+              #                  type: UUID
+              - column:
+                  name: configuration
+                  type: JSONB
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: etag
+                  type: BIGINT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
+#        - addForeignKeyConstraint:
+#            baseTableName: feature
+#            baseColumnNames: environment_id
+#            referencedTableName: environment
+#            referencedColumnNames: id
+#            constraintName: fk_feature_environment

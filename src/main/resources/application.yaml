@@ -1,0 +1,42 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: Feature Management
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    url: jdbc:postgresql://${db_host:localhost}:5432/feature_management
+    user: ${db_user:postgres}
+    password: ${db_password:postgres}
+
+  r2dbc:
+    url: r2dbc:postgresql://${db_host:localhost}:5432/feature_management
+    username: ${db_user:postgres}
+    password: ${db_password:postgres}
+    pool:
+        enabled: true
+        max-size: 20
+        initial-size: 10
+        max-idle-time: 30m
+pagination:
+  default-size: 10
+  default-page: 0
+  default-shortOrder: desc
+  default-featureShorting: id
+
+logging:
+  level:
+    com.fasterxml.jackson: DEBUG
+    org.hibernate.type.descriptor.converter: DEBUG
+    org.hibernate.SQL: DEBUG
+
+feature:
+  strategies:
+    - name: BooleanFeatureStrategy
+      description: This strategy is used to work based on boolean values true or false.
+    - name: JWTClaimFeatureStrategy
+      description: This strategy is used to work based on JWT claim key and value.
+    - name: HTTPRequestFeatureStrategy
+      description: This strategy is used to work based on HTTP request. That could be a URL path, header or request body.
+    - name: ScheduleFeatureStrategy
+      description: This strategy is used to enable or disable the feature based on dynamic conditions.

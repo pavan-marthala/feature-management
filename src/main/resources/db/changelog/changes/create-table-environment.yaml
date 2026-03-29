@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: env-1
+      author: pavan
+      changes:
+        - createTable:
+            tableName: environment
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: owners
+                  type: JSONB
+              - column:
+                  name: etag
+                  type: BIGINT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
