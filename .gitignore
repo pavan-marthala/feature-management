@@ -33,3 +33,4 @@ mvnw.cmd
 .mvn
 .DS_Store
 .m2
+*.iml

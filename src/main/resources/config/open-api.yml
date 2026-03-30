@@ -31,6 +31,8 @@ tags:
     description: Manage feature environment
   - name: Feature
     description: Feature management
+  - name: Dashboard
+    description: Dashboard statistics
 paths:
   /environments:
     post:
@@ -389,6 +391,47 @@ paths:
           description: Access forbidden - Permission required
         404:
           description: feature or owner does not exist
+  /features/{id}/status:
+    patch:
+      tags:
+        - Feature
+      summary: Enable or disable feature
+      description: |
+        Updates the feature status to enabled or disabled
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - in: query
+          name: status
+          schema:
+            type: boolean
+      responses:
+        204:
+          description: Feature status updated successfully
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized - Authentication required
+        403:
+          description: Access forbidden - Permission required
+        404:
+          description: Feature does not exist
+
+  /dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard statistics
+      description: |
+        Returns statistics for the dashboard, including total features, active features, disabled features, and total environments.
+      responses:
+        200:
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStats'
+        401:
+          description: Unauthorized - Authentication required
 
 components:
   schemas:
@@ -719,6 +762,31 @@ components:
       required:
         - type
         - strategy
+    DashboardStats:
+      type: object
+      description: Dashboard statistics
+      properties:
+        totalFeatures:
+          type: integer
+          description: Total number of features
+          example: 100
+        activeFeatures:
+          type: integer
+          description: Number of currently active features
+          example: 75
+        disabledFeatures:
+          type: integer
+          description: Number of currently disabled features
+          example: 25
+        totalEnvironments:
+          type: integer
+          description: Total number of environments
+          example: 5
+      required:
+        - totalFeatures
+        - activeFeatures
+        - disabledFeatures
+        - totalEnvironments
   parameters:
     Id:
       name: id

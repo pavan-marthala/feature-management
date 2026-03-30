@@ -131,6 +131,18 @@ public Mono<Void> removeOwnerFromFeature(UUID featureId, String owner) {
                 .then();
     }
 
+    @Override
+    public Mono<Void> updateFeatureStatus(UUID id, boolean enabled) {
+        log.debug("Updating feature status with id: {} to enabled: {}", id, enabled);
+        return getFeatureEntity(id)
+                .map(feature -> {
+                    feature.setEnabled(enabled);
+                    return feature;
+                })
+                .flatMap(featureRepo::save)
+                .then();
+    }
+
     private Mono<FeatureEntity> getFeatureEntity(UUID featureId) {
         return featureRepo.findById(featureId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Feature not found with id: " + featureId)));

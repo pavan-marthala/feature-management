@@ -31,4 +31,6 @@ public interface FeatureServiceInterface {
 
     Mono<Void> updateFeature(UUID id, FeatureConfiguration configuration);
 
+    Mono<Void> updateFeatureStatus(UUID id, boolean enabled);
+
 }

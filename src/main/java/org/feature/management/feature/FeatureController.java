@@ -79,6 +79,13 @@ public class FeatureController {
                 .thenReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
     }
 
+    @PatchMapping("/{id}/status")
+    public Mono<ResponseEntity<Void>> updateFeatureStatus(@PathVariable UUID id, @RequestParam boolean status) {
+        log.debug("Updating feature status by ID: {}", id);
+        return featureService.updateFeatureStatus(id, status)
+                .thenReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+    }
+
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteFeatureById(@PathVariable("id") UUID id) {
         log.debug("Deleting feature by ID: {}", id);
