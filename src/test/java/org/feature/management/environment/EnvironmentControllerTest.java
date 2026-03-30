@@ -138,4 +138,22 @@ class EnvironmentControllerTest {
                 .exchange()
                 .expectStatus().isNoContent();
     }
+
+    @Test
+    void shouldRemoveOwner() {
+        UUID id = UUID.randomUUID();
+        String owner = "user1";
+
+        EnvironmentEntity entity = new EnvironmentEntity();
+        entity.setEtag(1L);
+
+        when(environmentRepository.findById(id)).thenReturn(Mono.just(entity));
+        when(environmentService.removeOwnerFromEnvironment(id, owner)).thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri("/environments/{envId}/owners/{owner}", id, owner)
+                .header("If-Match", "1")
+                .exchange()
+                .expectStatus().isNoContent();
+    }
 }

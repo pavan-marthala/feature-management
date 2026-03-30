@@ -59,4 +59,14 @@ class FeatureMapperTest {
         assertThat(entity.getOwners()).containsExactly("user1");
         assertThat(entity.getConfiguration()).isNotNull();
     }
+
+    @Test
+    void shouldMapNullEntityToNullModel() {
+        assertThat(mapper.toModel(null)).isNull();
+    }
+
+    @Test
+    void shouldMapNullModelToNullEntity() {
+        assertThat(mapper.toEntity(null)).isNull();
+    }
 }

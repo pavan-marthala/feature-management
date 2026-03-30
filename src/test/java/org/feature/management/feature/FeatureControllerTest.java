@@ -142,4 +142,35 @@ class FeatureControllerTest {
                 .exchange()
                 .expectStatus().isNoContent();
     }
+
+    @Test
+    void shouldAddOwnerToFeature() {
+        UUID id = UUID.randomUUID();
+        String owner = "user1";
+
+        when(featureService.assignOwnerToFeature(id, owner)).thenReturn(Mono.empty());
+
+        webTestClient.post()
+                .uri("/features/{featureId}/owners/{owner}", id, owner)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void shouldRemoveOwnerFromFeature() {
+        UUID id = UUID.randomUUID();
+        String owner = "user1";
+
+        FeatureEntity entity = new FeatureEntity();
+        entity.setEtag(1L);
+
+        when(featureRepository.findById(id)).thenReturn(Mono.just(entity));
+        when(featureService.removeOwnerFromFeature(id, owner)).thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri("/features/{featureId}/owners/{owner}", id, owner)
+                .header("If-Match", "1")
+                .exchange()
+                .expectStatus().isNoContent();
+    }
 }
