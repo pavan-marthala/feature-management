@@ -768,18 +768,22 @@ components:
       properties:
         totalFeatures:
           type: integer
+          format: int64
           description: Total number of features
           example: 100
         activeFeatures:
           type: integer
+          format: int64
           description: Number of currently active features
           example: 75
         disabledFeatures:
           type: integer
+          format: int64
           description: Number of currently disabled features
           example: 25
         totalEnvironments:
           type: integer
+          format: int64
           description: Total number of environments
           example: 5
       required:
